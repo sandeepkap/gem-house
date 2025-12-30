@@ -1,26 +1,315 @@
-@import "tailwindcss";
-
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Dark section colors (Collection) */
+  --bg-dark: #0a0a0a;
+  --fg-dark: #fafafa;
+  --muted-dark: rgba(250, 250, 250, 0.56);
+  --line-dark: rgba(250, 250, 250, 0.12);
+
+  /* Light section colors (Hero, Contact) */
+  --bg-light: #ffffff;
+  --fg-light: #0a0a0a;
+  --muted-light: rgba(10, 10, 10, 0.56);
+  --line-light: rgba(10, 10, 10, 0.08);
+
+  /* Legacy vars for compatibility */
+  --bg: #0a0a0a;
+  --fg: #fafafa;
+  --muted: rgba(250, 250, 250, 0.56);
+  --line: rgba(250, 250, 250, 0.12);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-dark);
+  color: var(--fg-dark);
+  font-family: "Crimson Pro", "Cormorant Garamond", "EB Garamond", Georgia, "Times New Roman", Times, serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+a:hover {
+  opacity: 0.7;
+}
+
+.container {
+  width: min(1400px, calc(100vw - 10vw));
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .container {
+    width: calc(100vw - 40px);
   }
 }
 
+/* Typography utilities */
+.small {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--muted-dark);
+}
+
+.small-light {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--muted-light);
+}
+
+.divider {
+  height: 1px;
+  background: var(--line-dark);
+  margin: 80px 0;
+}
+
+.divider-light {
+  height: 1px;
+  background: var(--line-light);
+  margin: 80px 0;
+}
+
+/* Headings */
+h1 {
+  font-size: clamp(48px, 7vw, 82px);
+  line-height: 1.08;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin: 0 0 32px;
+  color: var(--fg-dark);
+}
+
+h2 {
+  font-size: clamp(32px, 4vw, 46px);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  margin: 0 0 48px;
+  color: var(--fg-dark);
+}
+
+h2.light {
+  color: var(--fg-light);
+}
+
+p {
+  margin: 0;
+  font-size: clamp(16px, 1.8vw, 18px);
+  line-height: 1.7;
+  color: var(--muted-dark);
+  font-weight: 300;
+}
+
+p.light {
+  color: var(--muted-light);
+}
+
+/* Stone Grid */
+.stonesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 48px;
+}
+
+@media (max-width: 1200px) {
+  .stonesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .stonesGrid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+/* Stone Cards */
+.stoneCard {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.3s ease;
+}
+
+.stoneCard:hover {
+  opacity: 0.8;
+}
+
+.stoneHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.stoneName {
+  font-size: 19px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.stoneCategory {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted-light);
+  white-space: nowrap;
+}
+
+.stoneImageFrame {
+  border: 1px solid var(--line-light);
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  background-color: rgba(10, 10, 10, 0.02);
+  margin-bottom: 24px;
+}
+
+.stoneImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.stoneMeta {
+  font-size: 14px;
+  color: var(--muted-light);
+  font-weight: 300;
+  letter-spacing: 0.01em;
+}
+
+/* Background - subtle gradient for the dark section */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-dark);
+}
+
+/* Section-specific backgrounds */
+.section-dark {
+  background: var(--bg-dark);
+}
+
+.section-light {
+  background: radial-gradient(ellipse 1200px 800px at 50% 0%, rgba(10, 10, 10, 0.03), transparent 70%),
+  #ffffff;
+}
+
+/* Contact section styling */
+.contact-section {
+  background-color: var(--bg-dark);
+  color: var(--fg-dark);
+}
+
+.contact-kicker {
+  font-size: 10px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(250, 250, 250, 0.48);
+  margin-bottom: 12px;
+}
+
+.contact-heading {
+  font-size: clamp(32px, 4vw, 46px);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  margin-bottom: 48px;
+  color: #fafafa;
+}
+
+.contact-link {
+  font-size: clamp(20px, 2.8vw, 32px);
+  color: #fafafa;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  transition: opacity 0.3s ease;
+  display: inline-block;
+}
+
+.contact-link:hover {
+  opacity: 0.6;
+}
+
+.contact-detail {
+  font-size: 18px;
+  color: rgba(250, 250, 250, 0.56);
+  font-weight: 300;
+}
+
+/* Footer */
+.footer {
+  font-size: 11px;
+  color: rgba(250, 250, 250, 0.42);
+  letter-spacing: 0.02em;
+  text-align: center;
+  padding-top: 48px;
+  border-top: 1px solid rgba(250, 250, 250, 0.08);
+  background-color: var(--bg-dark);
+}
+
+/* Scroll indicator */
+.scroll-indicator {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.scroll-line {
+  width: 1px;
+  height: 48px;
+  background: linear-gradient(to bottom, rgba(250, 250, 250, 0) 0%, rgba(250, 250, 250, 0.3) 100%);
+}
+
+.scroll-text {
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(250, 250, 250, 0.48);
+}
+
+/* Responsive typography */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 42px;
+    margin-bottom: 24px;
+  }
+
+  h2 {
+    font-size: 32px;
+    margin-bottom: 32px;
+  }
+
+  p {
+    font-size: 16px;
+  }
+
+  .contact-link {
+    font-size: 24px;
+  }
+
+  .contact-detail {
+    font-size: 16px;
+  }
 }
