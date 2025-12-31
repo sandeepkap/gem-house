@@ -14,10 +14,11 @@ export default function Reveal({ children, delayMs = 0 }: Props) {
     const style = useMemo<React.CSSProperties>(
         () => ({
             opacity: shown ? 1 : 0,
-            transform: shown ? "translateY(0px)" : "translateY(14px)",
+            transform: shown ? "translateY(0px)" : "translateY(24px)",
             transitionProperty: "opacity, transform",
-            transitionDuration: "700ms",
-            transitionTimingFunction: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+            transitionDuration: "1200ms",
+            // Custom luxury easing curve - smooth deceleration
+            transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
             transitionDelay: `${delayMs}ms`,
             willChange: "opacity, transform",
         }),
@@ -38,7 +39,7 @@ export default function Reveal({ children, delayMs = 0 }: Props) {
                     }
                 }
             },
-            { threshold: 0.15, rootMargin: "0px 0px -10% 0px" }
+            { threshold: 0.1, rootMargin: "0px 0px -8% 0px" }
         );
 
         obs.observe(el);

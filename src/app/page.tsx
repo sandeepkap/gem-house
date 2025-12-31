@@ -35,17 +35,17 @@ export default async function Page() {
             {/* HERO SECTION - Full viewport */}
             <section style={heroSectionStyle}>
                 <div style={heroContentStyle}>
-                    <Reveal>
+                    <Reveal delayMs={0}>
                         <div style={brandStyle}>KAPU & CO.</div>
                     </Reveal>
-                    <Reveal>
+                    <Reveal delayMs={150}>
                         <h1 style={h1Style}>
                             Fine Gemstones
                             <br />
                             Private Trade
                         </h1>
                     </Reveal>
-                    <Reveal>
+                    <Reveal delayMs={300}>
                         <p style={ledeStyle}>
                             An understated collection of fine gemstones. Sapphires, rubies,
                             and emeralds selected for color, proportion, and provenance.
@@ -64,24 +64,24 @@ export default async function Page() {
             {/* COLLECTION SECTION - Distinct background */}
             <section style={collectionSectionStyle}>
                 <div style={collectionContainerStyle}>
-                    <Reveal>
+                    <Reveal delayMs={0}>
                         <div style={sectionKickerStyle}>Available Now</div>
                     </Reveal>
-                    <Reveal>
+                    <Reveal delayMs={100}>
                         <h2 style={h2Style}>Collection</h2>
                     </Reveal>
 
                     <div style={gridStyle}>
-                        {stones.map((s) => {
+                        {stones.map((s, index) => {
                             const cover = s.images?.[0];
                             return (
-                                <Reveal key={s._id}>
-                                    <Link href={`/stones/id/${encodeURIComponent(s._id)}`} style={cardStyle}>
-                                    <div style={imageContainerStyle}>
+                                <Reveal key={s._id} delayMs={index * 80}>
+                                    <Link href={`/stones/${s._id}`} style={cardStyle}>
+                                        <div style={imageContainerStyle}>
                                             {cover ? (
                                                 <div style={imageFrameStyle}>
                                                     <Image
-                                                        src={urlFor(cover as any).width(800).height(800).fit("crop").url()}
+                                                        src={urlFor(cover).url()}
                                                         alt={s.name}
                                                         width={800}
                                                         height={800}
@@ -116,19 +116,19 @@ export default async function Page() {
             {/* CONTACT SECTION */}
             <section style={contactSectionStyle}>
                 <div style={contactContainerStyle}>
-                    <Reveal>
+                    <Reveal delayMs={0}>
                         <div style={sectionKickerLightStyle}>Inquiries</div>
                     </Reveal>
-                    <Reveal>
+                    <Reveal delayMs={100}>
                         <h2 style={h2LightStyle}>Contact</h2>
                     </Reveal>
 
-                    <Reveal>
+                    <Reveal delayMs={200}>
                         <div style={contactInfoStyle}>
-                            <a href="mailto:sandeepkap08@gmail.com" style={contactLinkStyle}>
-                                sandeepkap08@gmail.com
+                            <a href="mailto:inquiries@yourdomain.com" style={contactLinkStyle}>
+                                inquiries@yourdomain.com
                             </a>
-                            <div style={contactDetailStyle}>+94 77 692 2858</div>
+                            <div style={contactDetailStyle}>+94 XX XXX XXXX</div>
                         </div>
                     </Reveal>
                 </div>
@@ -202,6 +202,7 @@ const scrollIndicatorStyle: React.CSSProperties = {
     flexDirection: "column",
     alignItems: "center",
     gap: 12,
+    animation: "fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.8s both",
 };
 
 const scrollLineStyle: React.CSSProperties = {
@@ -271,7 +272,7 @@ const cardStyle: React.CSSProperties = {
     textDecoration: "none",
     color: "inherit",
     display: "block",
-    transition: "opacity 0.3s ease",
+    transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
     cursor: "pointer",
 };
 
@@ -366,7 +367,7 @@ const contactLinkStyle: React.CSSProperties = {
     color: "#fafafa",
     textDecoration: "none",
     letterSpacing: "-0.01em",
-    transition: "opacity 0.3s ease",
+    transition: "opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
 };
 
 const contactDetailStyle: React.CSSProperties = {
