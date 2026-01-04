@@ -28,7 +28,7 @@ function clamp(n: number, min: number, max: number) {
 
 export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
     // Default options that should always be available
-    const defaultLocations = ["Langley", "Sri Lanka", "USA", "Vancouver"];
+    const defaultLocations = ["Sri Lanka", "USA"];
     const defaultCategories = ["Sapphire", "Ruby", "Emerald", "Spinel", "Tourmaline", "Other"];
 
     // Facet options - merge with defaults
