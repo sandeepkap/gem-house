@@ -1,18 +1,33 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-    title: "KAPUGAMAGE & CO. | Fine Gemstones",
-    description:
-        "Fine gemstones curated with discretion. Sapphires, rubies, emeralds, and bespoke sourcing.",
-    metadataBase: new URL("https://example.com"),
+    title: "Ranasinghe & Co. — Fine Gemstones Private Trade",
+    description: "An understated collection of fine gemstones. Sapphires, rubies, and emeralds selected for color, proportion, and provenance. Offered strictly by appointment.",
+};
+
+export const viewport: Viewport = {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
 };
 
 export default function RootLayout({
                                        children,
-                                   }: Readonly<{ children: React.ReactNode }>) {
+                                   }: {
+    children: React.ReactNode;
+}) {
     return (
         <html lang="en">
+        <head>
+            <link rel="preconnect" href="https://fonts.googleapis.com" />
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+            <link
+                href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;500;600&display=swap"
+                rel="stylesheet"
+            />
+        </head>
         <body>{children}</body>
         </html>
     );

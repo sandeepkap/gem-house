@@ -36,6 +36,27 @@
   }
 }
 
+@keyframes subtleShift {
+  0%, 100% {
+    transform: scale(1) translate(0, 0);
+  }
+  33% {
+    transform: scale(1.05) translate(-2%, 2%);
+  }
+  66% {
+    transform: scale(1.03) translate(2%, -1%);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(200%) rotate(45deg);
+  }
+}
+
 html,
 body {
   margin: 0;
@@ -159,6 +180,29 @@ p.light {
   color: inherit;
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
   opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.stoneCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.1),
+          transparent
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+.stoneCard:hover::before {
+  animation: shimmer 1.2s ease-in-out;
 }
 
 .stoneCard:hover {
@@ -303,27 +347,272 @@ body {
   color: rgba(250, 250, 250, 0.48);
 }
 
+/* Navigation styles */
+.nav-link:hover {
+  color: #fafafa !important;
+}
+
+.inquiry-link:hover {
+  background-color: rgba(250, 250, 250, 0.05);
+  border-color: rgba(250, 250, 250, 0.4);
+}
+
+.company-name-link:hover .company-name {
+  color: #fafafa !important;
+}
+
+/* Mobile navigation */
+@media (max-width: 900px) {
+  .nav-links-desktop,
+  .nav-right-desktop {
+    display: none !important;
+  }
+
+  .mobile-menu-button {
+    display: flex !important;
+    justify-self: end;
+  }
+
+  .main-nav .logo {
+    justify-self: start;
+  }
+}
+
+@media (min-width: 901px) {
+  .mobile-menu-button {
+    display: none !important;
+  }
+}
+
 /* Responsive typography */
 @media (max-width: 768px) {
   h1 {
-    font-size: 42px;
-    margin-bottom: 24px;
+    font-size: 42px !important;
+    margin-bottom: 24px !important;
   }
 
   h2 {
-    font-size: 32px;
-    margin-bottom: 32px;
+    font-size: 32px !important;
+    margin-bottom: 32px !important;
   }
 
   p {
-    font-size: 16px;
+    font-size: 16px !important;
   }
 
   .contact-link {
-    font-size: 24px;
+    font-size: 24px !important;
   }
 
   .contact-detail {
-    font-size: 16px;
+    font-size: 16px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 36px !important;
+    line-height: 1.1 !important;
+  }
+
+  h2 {
+    font-size: 28px !important;
+  }
+
+  body {
+    font-size: 15px !important;
+    overflow-x: hidden;
+  }
+
+  /* Hero section mobile fixes */
+  section[style*="minHeight: 100vh"] {
+    padding: 0 20px !important;
+  }
+
+  /* Collection section mobile fixes */
+  section[style*="padding: 160px"] {
+    padding: 80px 20px 100px 20px !important;
+  }
+
+  /* Contact section mobile fixes */
+  section[style*="backgroundColor: #0a0a0a"] {
+    padding: 80px 20px 60px 20px !important;
+  }
+
+  /* Prevent horizontal overflow */
+  * {
+    max-width: 100%;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* Collection layout with filters - responsive */
+@media (max-width: 1200px) {
+  .collection-layout-grid {
+    grid-template-columns: 280px 1fr !important;
+    gap: 40px !important;
+  }
+
+  .stones-filter-wrap {
+    grid-template-columns: 280px 1fr !important;
+    gap: 60px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .collection-layout-grid {
+    grid-template-columns: 1fr !important;
+    gap: 48px !important;
+  }
+
+  .filter-column {
+    position: static !important;
+    max-width: 100% !important;
+  }
+
+  .stones-filter-wrap {
+    grid-template-columns: 1fr !important;
+    gap: 48px !important;
+  }
+
+  .filter-sidebar {
+    position: static !important;
+    max-width: 100% !important;
+    margin-bottom: 40px;
+  }
+
+  .stones-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
+    gap: 32px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .stones-grid-filtered {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+  }
+
+  .stones-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    width: 100%;
+  }
+
+  .filter-sidebar {
+    padding: 24px 20px !important;
+  }
+
+  .filter-results {
+    padding: 0 !important;
+  }
+
+  /* Ensure stone cards are equal size */
+  .stone-card {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Ensure image frames maintain aspect ratio */
+  .stone-image-frame {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+
+  .stone-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Adjust text sizing for mobile */
+  .stone-card .stone-name-style {
+    font-size: 15px !important;
+  }
+
+  .stone-card .stone-category-style {
+    font-size: 9px !important;
+  }
+
+  .stone-card .stone-meta-style {
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .stones-grid-filtered {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .stones-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .stone-card .stone-name-style {
+    font-size: 14px !important;
+  }
+}
+
+/* Stone detail page responsive */
+@media (max-width: 1024px) {
+  .stone-detail-wrapper {
+    grid-template-columns: 350px 1fr !important;
+    gap: 60px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .stone-detail-wrapper {
+    grid-template-columns: 1fr !important;
+    gap: 48px !important;
+  }
+
+  .stone-detail-column {
+    position: static !important;
+  }
+
+  .stone-detail-gallery {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .stone-detail-page {
+    padding: 40px 20px 80px !important;
+  }
+
+  .stone-detail-nav {
+    margin-bottom: 60px !important;
+  }
+
+  .stone-detail-h1 {
+    font-size: 32px !important;
+    margin-bottom: 32px !important;
+  }
+
+  .stone-detail-specifications {
+    gap: 16px !important;
+  }
+
+  .stone-detail-spec-row {
+    padding-bottom: 16px !important;
+  }
+
+  .stone-detail-divider {
+    margin: 32px 0 !important;
+  }
+
+  .whatsapp-link {
+    width: 100% !important;
+    justify-content: center !important;
   }
 }
