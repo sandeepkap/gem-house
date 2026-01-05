@@ -5,6 +5,7 @@ import Link from "next/link";
 import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
 import Reveal from "@/app/components/Reveal";
+import StoneGallery from "@/app/components/StoneGallery";
 
 type Stone = {
     _id: string;
@@ -18,7 +19,6 @@ type Stone = {
     currency?: string | null;
     priceOnRequest?: boolean | null;
 
-    // New fields
     agclNo?: string | null;
     color?: string | null;
     shape?: string | null;
@@ -31,14 +31,8 @@ type Stone = {
     comments?: string | null;
 };
 
-/**
- * WhatsApp rules:
- * - wa.me URL: https://wa.me/<digitsOnlyPhone>
- * - phone must be E.164 digits only (no +, no spaces)
- */
 function buildWhatsAppLink(phoneDigitsOnly: string, stoneName: string) {
-    const safePhone = String(phoneDigitsOnly).replace(/\D/g, ""); // keep digits only
-
+    const safePhone = String(phoneDigitsOnly).replace(/\D/g, "");
     const text = `Hello, I'm interested in ${stoneName}. Please share availability, price, and certification details.`;
     return `https://wa.me/${safePhone}?text=${encodeURIComponent(text)}`;
 }
@@ -56,7 +50,6 @@ async function getStoneById(id: string): Promise<Stone | null> {
       price,
       currency,
       priceOnRequest,
-
       agclNo,
       color,
       shape,
@@ -90,8 +83,6 @@ function formatDimensions(dim?: Stone["dimensions"] | null) {
     const D = typeof dim.depth === "number" ? dim.depth : null;
 
     if (L === null && W === null && D === null) return null;
-
-    // Only show parts that exist; but prefer the full L×W×D when available
     if (L !== null && W !== null && D !== null) return `${L} × ${W} × ${D} mm`;
 
     const parts = [L, W, D].map((x) => (x === null ? "—" : String(x)));
@@ -130,96 +121,94 @@ export default async function StoneByIdPage({
 
     const dims = formatDimensions(stone.dimensions);
 
+    // Build full-size image URLs on the server, pass strings to client gallery
+    const imageUrls = (stone.images || []).map((img: any) =>
+        urlFor(img).width(2400).fit("max").url()
+    );
+
     return (
-        <main style={pageStyle} className="stone-detail-page">
-            {/* Navigation */}
-            <nav style={navStyle} className="stone-detail-nav">
+        <main style={pageStyle}>
+            <nav style={navStyle}>
                 <Link href="/" style={navLinkStyle}>
                     ← Collection
                 </Link>
             </nav>
 
-            {/* Two-column layout */}
-            <div style={contentWrapperStyle} className="stone-detail-wrapper">
-                {/* Left column - Stone details */}
-                <aside style={detailsColumnStyle} className="stone-detail-column">
+            <div style={contentWrapperStyle}>
+                <aside style={detailsColumnStyle}>
                     <Reveal delayMs={0}>
                         <div style={kickerStyle}>{stone.category}</div>
                     </Reveal>
 
                     <Reveal delayMs={100}>
-                        <h1 style={h1Style} className="stone-detail-h1">{stone.name}</h1>
+                        <h1 style={h1Style}>{stone.name}</h1>
                     </Reveal>
 
                     <Reveal delayMs={200}>
-                        <div style={specificationsStyle} className="stone-detail-specifications">
-                            <div style={specRowStyle} className="stone-detail-spec-row">
+                        <div style={specificationsStyle}>
+                            <div style={specRowStyle}>
                                 <span style={specLabelStyle}>Origin</span>
                                 <span style={specValueStyle}>{stone.origin || "Undisclosed"}</span>
                             </div>
 
                             {typeof stone.carat === "number" && (
-                                <div style={specRowStyle} className="stone-detail-spec-row">
+                                <div style={specRowStyle}>
                                     <span style={specLabelStyle}>Weight</span>
                                     <span style={specValueStyle}>{stone.carat} ct</span>
                                 </div>
                             )}
 
-                            <div style={specRowStyle} className="stone-detail-spec-row">
+                            <div style={specRowStyle}>
                                 <span style={specLabelStyle}>Price</span>
                                 <span style={specValueStyle}>{formatPrice(stone)}</span>
                             </div>
 
-                            {/* NEW SPECS */}
                             {stone.agclNo ? (
-                                <div style={specRowStyle} className="stone-detail-spec-row">
+                                <div style={specRowStyle}>
                                     <span style={specLabelStyle}>AGCL No</span>
                                     <span style={specValueStyle}>{stone.agclNo}</span>
                                 </div>
                             ) : null}
 
                             {stone.color ? (
-                                <div style={specRowStyle} className="stone-detail-spec-row">
+                                <div style={specRowStyle}>
                                     <span style={specLabelStyle}>Color</span>
                                     <span style={specValueStyle}>{stone.color}</span>
                                 </div>
                             ) : null}
 
                             {stone.shape ? (
-                                <div style={specRowStyle} className="stone-detail-spec-row">
+                                <div style={specRowStyle}>
                                     <span style={specLabelStyle}>Shape</span>
                                     <span style={specValueStyle}>{stone.shape}</span>
                                 </div>
                             ) : null}
 
                             {stone.cut ? (
-                                <div style={specRowStyle} className="stone-detail-spec-row">
+                                <div style={specRowStyle}>
                                     <span style={specLabelStyle}>Cut</span>
                                     <span style={specValueStyle}>{stone.cut}</span>
                                 </div>
                             ) : null}
 
                             {dims ? (
-                                <div style={specRowStyle} className="stone-detail-spec-row">
+                                <div style={specRowStyle}>
                                     <span style={specLabelStyle}>Dimensions</span>
                                     <span style={specValueStyle}>{dims}</span>
                                 </div>
                             ) : null}
 
                             {stone.comments ? (
-                                <div style={{ ...specRowStyle, borderBottom: "none", paddingBottom: 0 }} className="stone-detail-spec-row">
+                                <div style={{ ...specRowStyle, borderBottom: "none", paddingBottom: 0 }}>
                                     <span style={specLabelStyle}>Comments</span>
-                                    <span style={{ ...specValueStyle, maxWidth: 220 }}>
-                    {stone.comments}
-                  </span>
+                                    <span style={{ ...specValueStyle, maxWidth: 240 }}>{stone.comments}</span>
                                 </div>
                             ) : null}
                         </div>
                     </Reveal>
 
-                    <div style={dividerStyle} className="stone-detail-divider" />
+                    <div style={dividerStyle} />
 
-                    {/* Contact section */}
                     <Reveal delayMs={300}>
                         <div>
                             <div style={sectionKickerStyle}>Inquiries</div>
@@ -237,7 +226,6 @@ export default async function StoneByIdPage({
                                 <a
                                     href={buildWhatsAppLink("94777752858", stone.name)}
                                     style={whatsAppLinkStyle}
-                                    className="whatsapp-link"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
@@ -245,31 +233,15 @@ export default async function StoneByIdPage({
                                     WhatsApp Inquiry
                                 </a>
 
-                                <div style={contactNoteStyle}>
-                                    Pre-filled message references {stone.name}
-                                </div>
+                                <div style={contactNoteStyle}>Pre-filled message references {stone.name}</div>
                             </div>
                         </div>
                     </Reveal>
                 </aside>
 
-                {/* Right column - Gallery */}
+                {/* Client gallery (click to full view) */}
                 <section style={galleryColumnStyle}>
-                    <div style={galleryGridStyle} className="stone-detail-gallery">
-                        {(stone.images || []).map((img, idx) => (
-                            <Reveal key={idx} delayMs={100 + idx * 100}>
-                                <div style={imageFrameStyle}>
-                                    <Image
-                                        src={urlFor(img).width(1200).height(1200).fit("max").url()}
-                                        alt={`${stone.name} view ${idx + 1}`}
-                                        width={1200}
-                                        height={1200}
-                                        style={imageStyle}
-                                    />
-                                </div>
-                            </Reveal>
-                        ))}
-                    </div>
+                    <StoneGallery stoneName={stone.name} imageUrls={imageUrls} />
                 </section>
             </div>
 
@@ -290,10 +262,7 @@ const pageStyle: React.CSSProperties = {
     padding: "60px 5vw 100px",
 };
 
-const navStyle: React.CSSProperties = {
-    maxWidth: 1400,
-    margin: "0 auto 80px",
-};
+const navStyle: React.CSSProperties = { maxWidth: 1400, margin: "0 auto 80px" };
 
 const navLinkStyle: React.CSSProperties = {
     fontSize: 13,
@@ -311,10 +280,7 @@ const contentWrapperStyle: React.CSSProperties = {
     alignItems: "start",
 };
 
-const detailsColumnStyle: React.CSSProperties = {
-    position: "sticky",
-    top: 80,
-};
+const detailsColumnStyle: React.CSSProperties = { position: "sticky", top: 80 };
 
 const kickerStyle: React.CSSProperties = {
     fontSize: 10,
@@ -332,11 +298,7 @@ const h1Style: React.CSSProperties = {
     marginBottom: 48,
 };
 
-const specificationsStyle: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "column",
-    gap: 20,
-};
+const specificationsStyle: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 20 };
 
 const specRowStyle: React.CSSProperties = {
     display: "flex",
@@ -377,12 +339,7 @@ const sectionKickerStyle: React.CSSProperties = {
     marginBottom: 12,
 };
 
-const h2Style: React.CSSProperties = {
-    fontSize: 24,
-    fontWeight: 400,
-    letterSpacing: "-0.01em",
-    marginBottom: 16,
-};
+const h2Style: React.CSSProperties = { fontSize: 24, fontWeight: 400, letterSpacing: "-0.01em", marginBottom: 16 };
 
 const ledeStyle: React.CSSProperties = {
     fontSize: 15,
@@ -392,11 +349,7 @@ const ledeStyle: React.CSSProperties = {
     marginBottom: 32,
 };
 
-const contactActionsStyle: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "column",
-    gap: 16,
-};
+const contactActionsStyle: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 16 };
 
 const emailLinkStyle: React.CSSProperties = {
     fontSize: 16,
@@ -419,12 +372,9 @@ const whatsAppLinkStyle: React.CSSProperties = {
     border: "1px solid rgba(250, 250, 250, 0.16)",
     background: "rgba(250, 250, 250, 0.03)",
     width: "fit-content",
-    transition: "all 0.3s ease",
 };
 
-const whatsAppIconStyle: React.CSSProperties = {
-    fontSize: 18,
-};
+const whatsAppIconStyle: React.CSSProperties = { fontSize: 18 };
 
 const contactNoteStyle: React.CSSProperties = {
     fontSize: 11,
@@ -432,29 +382,7 @@ const contactNoteStyle: React.CSSProperties = {
     letterSpacing: "0.01em",
 };
 
-const galleryColumnStyle: React.CSSProperties = {
-    width: "100%",
-};
-
-const galleryGridStyle: React.CSSProperties = {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, 1fr)",
-    gap: 24,
-};
-
-const imageFrameStyle: React.CSSProperties = {
-    border: "1px solid rgba(250, 250, 250, 0.12)",
-    background: "rgba(250, 250, 250, 0.02)",
-    aspectRatio: "1 / 1",
-    overflow: "hidden",
-};
-
-const imageStyle: React.CSSProperties = {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    display: "block",
-};
+const galleryColumnStyle: React.CSSProperties = { width: "100%" };
 
 const footerStyle: React.CSSProperties = {
     maxWidth: 1400,
@@ -477,10 +405,7 @@ const notFoundWrapStyle: React.CSSProperties = {
     padding: "0 5vw",
 };
 
-const notFoundContentStyle: React.CSSProperties = {
-    textAlign: "center",
-    maxWidth: 500,
-};
+const notFoundContentStyle: React.CSSProperties = { textAlign: "center", maxWidth: 500 };
 
 const backLinkStyle: React.CSSProperties = {
     display: "inline-block",
