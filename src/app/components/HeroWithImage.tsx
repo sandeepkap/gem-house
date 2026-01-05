@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Reveal from "./Reveal";
 
 interface HeroWithImageProps {
@@ -8,39 +8,61 @@ interface HeroWithImageProps {
 }
 
 const HeroWithImage: React.FC<HeroWithImageProps> = ({ imageSrc }) => {
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    // Preload the image to ensure the fade is perfectly timed
+    useEffect(() => {
+        const img = new Image();
+        img.src = imageSrc;
+        img.onload = () => setIsLoaded(true);
+    }, [imageSrc]);
+
     return (
         <section style={heroSectionStyle}>
+            {/* BACKGROUND LAYER */}
             <div style={heroImageContainerStyle}>
+                {/* The Actual Image */}
                 <img
                     src={imageSrc}
                     alt="Ranasinghe & Co. Background"
-                    style={heroImageStyle}
+                    style={{
+                        ...heroImageStyle,
+                        opacity: isLoaded ? 0.9 : 0, // Fades in from 0
+                        transform: isLoaded ? "scale(1)" : "scale(1.03)", // Subtle "settling" effect
+                    }}
                 />
-                {/* Deep linear fade ensures smooth transition into the collection section */}
+
+                {/* Persistent Gradient Overlay - This handles the bleed into the next section */}
                 <div style={heroFadeOverlayStyle} />
             </div>
 
+            {/* CONTENT LAYER */}
             <div style={heroContentStyle}>
-                <Reveal delayMs={0}>
+                <Reveal delayMs={400}>
                     <div style={brandStyle}>RANASINGHE & CO.</div>
                 </Reveal>
-                <Reveal delayMs={150}>
+                <Reveal delayMs={550}>
                     <h1 style={h1Style}>
                         Fine Gemstones
                         <br />
                         Private Trade
                     </h1>
                 </Reveal>
-                <Reveal delayMs={300}>
+                <Reveal delayMs={700}>
                     <p style={ledeStyle}>
                         An understated collection of fine gemstones. Sapphires, rubies,
                         and emeralds selected for color, proportion, and provenance.
-                        Offered by appointment.
+                        Offered exclusively by appointment.
                     </p>
                 </Reveal>
             </div>
 
-            <div style={scrollIndicatorStyle}>
+            {/* SCROLL INDICATOR */}
+            <div style={{
+                ...scrollIndicatorStyle,
+                opacity: isLoaded ? 1 : 0,
+                transition: "opacity 2s ease 1s" // Waits for image before showing
+            }}>
                 <div style={scrollTextStyle}>The Collection</div>
                 <div style={scrollLineStyle} />
             </div>
@@ -59,13 +81,14 @@ const heroSectionStyle: React.CSSProperties = {
     padding: "0 5vw",
     position: "relative",
     overflow: "hidden",
-    backgroundColor: "#F9F8F6",
+    backgroundColor: "#F9F8F6", // High-end 'Paper/Parchment' color
 };
 
 const heroImageContainerStyle: React.CSSProperties = {
     position: "absolute",
     inset: 0,
     zIndex: 0,
+    backgroundColor: "#F9F8F6",
 };
 
 const heroImageStyle: React.CSSProperties = {
@@ -73,14 +96,15 @@ const heroImageStyle: React.CSSProperties = {
     height: "100%",
     objectFit: "cover",
     objectPosition: "center",
-    opacity: 0.9,
+    transition: "opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1), transform 2s cubic-bezier(0.2, 0, 0.2, 1)",
+    willChange: "opacity, transform",
 };
 
 const heroFadeOverlayStyle: React.CSSProperties = {
     position: "absolute",
     inset: 0,
-    // This fade creates a seamless bleed from the image into the next section's background
-    background: "linear-gradient(to bottom, rgba(249, 248, 246, 0) 0%, rgba(249, 248, 246, 0.4) 60%, rgba(249, 248, 246, 1) 100%)",
+    // This creates the seamless transition into the #F9F8F6 background of the next section
+    background: "linear-gradient(to bottom, rgba(249, 248, 246, 0) 0%, rgba(249, 248, 246, 0.3) 50%, rgba(249, 248, 246, 1) 100%)",
 };
 
 const heroContentStyle: React.CSSProperties = {
@@ -131,7 +155,7 @@ const scrollLineStyle: React.CSSProperties = {
     width: 1,
     height: 50,
     backgroundColor: "#1a1a1a",
-    opacity: 0.3,
+    opacity: 0.2,
 };
 
 const scrollTextStyle: React.CSSProperties = {
@@ -139,7 +163,7 @@ const scrollTextStyle: React.CSSProperties = {
     letterSpacing: "0.3em",
     textTransform: "uppercase",
     color: "#1a1a1a",
-    opacity: 0.6,
+    opacity: 0.5,
 };
 
 export default HeroWithImage;
