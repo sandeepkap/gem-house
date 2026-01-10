@@ -31,15 +31,21 @@ type Stone = {
     comments?: string | null;
 };
 
-function buildWhatsAppLink(phoneDigitsOnly: string, stoneName: string) {
+function buildWhatsAppLink(
+    phoneDigitsOnly: string,
+    stoneName: string,
+    carat?: number
+) {
     const safePhone = String(phoneDigitsOnly).replace(/\D/g, "");
-    const text = `Hello, I'm interested in ${stoneName}. Please share availability, price, and certification details.`;
+    const weightText = typeof carat === "number" ? ` (${carat} ct)` : "";
+    const text = `Hello, I'm interested in ${stoneName}${weightText}. Please share availability, price, and certification details.`;
     return `https://wa.me/${safePhone}?text=${encodeURIComponent(text)}`;
 }
 
+
 async function getStoneById(idRaw: string): Promise<Stone | null> {
     const id = String(idRaw || "").trim();
-    if (!id) return null;
+    if (!id) return null
 
     // Support both published + drafts without changing your link mapping
     const draftId = id.startsWith("drafts.") ? id : `drafts.${id}`;
@@ -269,7 +275,7 @@ export default async function StoneByIdPage({
                                 </a>
 
                                 <a
-                                    href={buildWhatsAppLink("94777752858", stone.name)}
+                                    href={buildWhatsAppLink("94777752858", stone.name, stone.carat)}
                                     style={whatsAppLinkStyle}
                                     target="_blank"
                                     rel="noopener noreferrer"
