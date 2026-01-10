@@ -17,9 +17,7 @@ type StoneListItem = {
 };
 
 function uniqSorted(values: (string | undefined)[]) {
-    return Array.from(new Set(values.filter(Boolean) as string[])).sort((a, b) =>
-        a.localeCompare(b)
-    );
+    return Array.from(new Set(values.filter(Boolean) as string[])).sort((a, b) => a.localeCompare(b));
 }
 
 function clamp(n: number, min: number, max: number) {
@@ -53,7 +51,7 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
         const nums = stones.map((s) => s.carat).filter((n): n is number => typeof n === "number");
         if (nums.length === 0) return { min: 0, max: 23 };
         const maxCarat = Math.ceil(Math.max(...nums));
-        return { min: 0, max: Math.max(maxCarat, 23) }; // At least 23, or higher if data has larger stones
+        return { min: 0, max: Math.max(maxCarat, 23) };
     }, [stones]);
 
     // Filter state - initialize with full ranges so all items show by default
@@ -102,13 +100,7 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
 
             return true;
         });
-    }, [
-        stones,
-        selectedLocations,
-        selectedCategories,
-        caratRange,
-        caratMinMax.max,
-    ]);
+    }, [stones, selectedLocations, selectedCategories, caratRange, caratMinMax.max]);
 
     const countsByLocation = useMemo(() => {
         const m = new Map<string, number>();
@@ -156,11 +148,7 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                 {/* Location */}
                 {locations.length > 0 && (
                     <div style={filterSectionStyle}>
-                        <button
-                            onClick={() => toggleSection("location")}
-                            style={sectionHeaderStyle}
-                            type="button"
-                        >
+                        <button onClick={() => toggleSection("location")} style={sectionHeaderStyle} type="button">
                             <span style={sectionTitleStyle}>Location</span>
                             <span style={chevronStyle}>{expandedSections.location ? "−" : "+"}</span>
                         </button>
@@ -186,11 +174,7 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
 
                 {/* Carat Weight */}
                 <div style={filterSectionStyle}>
-                    <button
-                        onClick={() => toggleSection("carat")}
-                        style={sectionHeaderStyle}
-                        type="button"
-                    >
+                    <button onClick={() => toggleSection("carat")} style={sectionHeaderStyle} type="button">
                         <span style={sectionTitleStyle}>Carat Weight</span>
                         <span style={chevronStyle}>{expandedSections.carat ? "−" : "+"}</span>
                     </button>
@@ -244,11 +228,7 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                 {/* Category */}
                 {categories.length > 0 && (
                     <div style={filterSectionStyle}>
-                        <button
-                            onClick={() => toggleSection("category")}
-                            style={sectionHeaderStyle}
-                            type="button"
-                        >
+                        <button onClick={() => toggleSection("category")} style={sectionHeaderStyle} type="button">
                             <span style={sectionTitleStyle}>Category</span>
                             <span style={chevronStyle}>{expandedSections.category ? "−" : "+"}</span>
                         </button>
@@ -275,14 +255,7 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
 
             {/* RESULTS */}
             <section style={resultsStyle} className="filter-results">
-                <div style={resultsHeaderStyle}>
-                    <div>
-                        <div style={resultsKickerStyle}>Available Now</div>
-                        <div style={resultsCountStyle}>
-                            {filtered.length} {filtered.length === 1 ? "Stone" : "Stones"}
-                        </div>
-                    </div>
-                </div>
+                {/* Removed the header that shows total stone count */}
 
                 {filtered.length > 0 ? (
                     <div style={gridStyle} className="stones-grid">
@@ -290,7 +263,11 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                             const cover = s.images?.[0];
                             return (
                                 <Reveal key={s._id} delayMs={index * 60}>
-                                    <Link href={`/stones/id/${encodeURIComponent(s._id)}`} style={cardStyle} className="stone-card">
+                                    <Link
+                                        href={`/stones/id/${encodeURIComponent(s._id)}`}
+                                        style={cardStyle}
+                                        className="stone-card"
+                                    >
                                         <div style={imageFrameStyle} className="stone-image-frame">
                                             {cover ? (
                                                 <Image
@@ -309,9 +286,7 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                                         <div style={cardContentStyle}>
                                             <div style={cardHeaderStyle}>
                                                 <div style={stoneNameStyle}>{s.name}</div>
-                                                {s.category && (
-                                                    <div style={stoneCategoryStyle}>{s.category}</div>
-                                                )}
+                                                {s.category && <div style={stoneCategoryStyle}>{s.category}</div>}
                                             </div>
                                             <div style={stoneMetaStyle}>
                                                 {s.origin || "Origin undisclosed"}
@@ -345,9 +320,6 @@ const wrapStyle: React.CSSProperties = {
     gap: 80,
     alignItems: "start",
 };
-
-// Add media query support via className
-const wrapResponsiveClass = "stones-filter-wrap";
 
 const sidebarStyle: React.CSSProperties = {
     position: "sticky",
@@ -494,25 +466,6 @@ const resultsStyle: React.CSSProperties = {
     minWidth: 0,
 };
 
-const resultsHeaderStyle: React.CSSProperties = {
-    marginBottom: 48,
-};
-
-const resultsKickerStyle: React.CSSProperties = {
-    fontSize: 10,
-    letterSpacing: "0.26em",
-    textTransform: "uppercase",
-    color: "rgba(10, 10, 10, 0.48)",
-    marginBottom: 8,
-};
-
-const resultsCountStyle: React.CSSProperties = {
-    fontSize: 28,
-    fontWeight: 400,
-    letterSpacing: "-0.01em",
-    color: "#0a0a0a",
-};
-
 const gridStyle: React.CSSProperties = {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
@@ -524,7 +477,8 @@ const cardStyle: React.CSSProperties = {
     textDecoration: "none",
     color: "inherit",
     display: "block",
-    transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+    transition:
+        "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
     cursor: "pointer",
 };
 
