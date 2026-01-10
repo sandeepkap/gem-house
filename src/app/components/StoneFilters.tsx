@@ -17,7 +17,9 @@ type StoneListItem = {
 };
 
 function uniqSorted(values: (string | undefined)[]) {
-    return Array.from(new Set(values.filter(Boolean) as string[])).sort((a, b) => a.localeCompare(b));
+    return Array.from(new Set(values.filter(Boolean) as string[])).sort((a, b) =>
+        a.localeCompare(b)
+    );
 }
 
 export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
@@ -26,18 +28,22 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
 
     const locations = useMemo(() => {
         const fromData = uniqSorted(stones.map((s) => s.origin));
-        return Array.from(new Set([...defaultLocations, ...fromData])).sort((a, b) => a.localeCompare(b));
+        return Array.from(new Set([...defaultLocations, ...fromData])).sort((a, b) =>
+            a.localeCompare(b)
+        );
     }, [stones]);
 
     const categories = useMemo(() => {
         const fromData = uniqSorted(stones.map((s) => s.category));
-        return Array.from(new Set([...defaultCategories, ...fromData])).sort((a, b) => a.localeCompare(b));
+        return Array.from(new Set([...defaultCategories, ...fromData])).sort((a, b) =>
+            a.localeCompare(b)
+        );
     }, [stones]);
 
     const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-    // ✅ Slider: 0..8, step 1
+    // Slider: 0..8
     const [minCarat, setMinCarat] = useState<number>(0);
 
     const [expandedSections, setExpandedSections] = useState({
@@ -54,17 +60,29 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
         setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
     };
 
+    // ---------- CASE-INSENSITIVE NORMALIZATION ----------
+    const selectedLocationsLC = useMemo(
+        () => selectedLocations.map((l) => l.toLowerCase()),
+        [selectedLocations]
+    );
+
+    const selectedCategoriesLC = useMemo(
+        () => selectedCategories.map((c) => c.toLowerCase()),
+        [selectedCategories]
+    );
+
     const filtered = useMemo(() => {
         return stones.filter((s) => {
-            if (selectedLocations.length > 0) {
-                if (!s.origin || !selectedLocations.includes(s.origin)) return false;
+            if (selectedLocationsLC.length > 0) {
+                if (!s.origin || !selectedLocationsLC.includes(s.origin.toLowerCase()))
+                    return false;
             }
 
-            if (selectedCategories.length > 0) {
-                if (!s.category || !selectedCategories.includes(s.category)) return false;
+            if (selectedCategoriesLC.length > 0) {
+                if (!s.category || !selectedCategoriesLC.includes(s.category.toLowerCase()))
+                    return false;
             }
 
-            // Only enforce carat filter if stone has carat; allow missing carat when minCarat is 0
             if (minCarat > 0) {
                 if (typeof s.carat !== "number") return false;
                 if (s.carat < minCarat) return false;
@@ -72,7 +90,7 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
 
             return true;
         });
-    }, [stones, selectedLocations, selectedCategories, minCarat]);
+    }, [stones, selectedLocationsLC, selectedCategoriesLC, minCarat]);
 
     const countsByLocation = useMemo(() => {
         const m = new Map<string, number>();
@@ -101,16 +119,15 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
     const hasActiveFilters =
         selectedLocations.length > 0 || selectedCategories.length > 0 || minCarat !== 0;
 
-    // ✅ tick labels: 0 1 2 ... 8
     const ticks = useMemo(() => Array.from({ length: 9 }, (_, i) => i), []);
 
     return (
-        <div style={wrapStyle} className="stones-filter-wrap">
-            <aside style={sidebarStyle} className="filter-sidebar">
+        <div style={wrapStyle}>
+            <aside style={sidebarStyle}>
                 <div style={sidebarHeaderStyle}>
                     <h3 style={sidebarTitleStyle}>Refine Selection</h3>
                     {hasActiveFilters && (
-                        <button onClick={resetAll} style={resetBtnStyle} type="button">
+                        <button onClick={resetAll} style={resetBtnStyle}>
                             Clear All
                         </button>
                     )}
@@ -119,9 +136,14 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                 {/* Location */}
                 {locations.length > 0 && (
                     <div style={filterSectionStyle}>
-                        <button onClick={() => toggleSection("location")} style={sectionHeaderStyle} type="button">
+                        <button
+                            onClick={() => toggleSection("location")}
+                            style={sectionHeaderStyle}
+                        >
                             <span style={sectionTitleStyle}>Location</span>
-                            <span style={chevronStyle}>{expandedSections.location ? "−" : "+"}</span>
+                            <span style={chevronStyle}>
+                                {expandedSections.location ? "−" : "+"}
+                            </span>
                         </button>
 
                         {expandedSections.location && (
@@ -131,11 +153,15 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                                         <input
                                             type="checkbox"
                                             checked={selectedLocations.includes(loc)}
-                                            onChange={() => setSelectedLocations((a) => toggle(a, loc))}
+                                            onChange={() =>
+                                                setSelectedLocations((a) => toggle(a, loc))
+                                            }
                                             style={checkboxInputStyle}
                                         />
                                         <span style={checkboxTextStyle}>{loc}</span>
-                                        <span style={countStyle}>({countsByLocation.get(loc) || 0})</span>
+                                        <span style={countStyle}>
+                                            ({countsByLocation.get(loc) || 0})
+                                        </span>
                                     </label>
                                 ))}
                             </div>
@@ -145,9 +171,14 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
 
                 {/* Weight */}
                 <div style={filterSectionStyle}>
-                    <button onClick={() => toggleSection("carat")} style={sectionHeaderStyle} type="button">
+                    <button
+                        onClick={() => toggleSection("carat")}
+                        style={sectionHeaderStyle}
+                    >
                         <span style={sectionTitleStyle}>Weight</span>
-                        <span style={chevronStyle}>{expandedSections.carat ? "−" : "+"}</span>
+                        <span style={chevronStyle}>
+                            {expandedSections.carat ? "−" : "+"}
+                        </span>
                     </button>
 
                     {expandedSections.carat && (
@@ -163,12 +194,13 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                                 max={8}
                                 step={1}
                                 value={minCarat}
-                                onChange={(e) => setMinCarat(Number(e.target.value))}
+                                onChange={(e) =>
+                                    setMinCarat(Number(e.target.value))
+                                }
                                 style={sliderStyle}
                             />
 
-                            {/* ✅ tick labels: 0..8 */}
-                            <div style={tickRowStyle} aria-hidden="true">
+                            <div style={tickRowStyle}>
                                 {ticks.map((n) => (
                                     <span key={n} style={tickTextStyle}>
                                         {n}
@@ -182,9 +214,14 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                 {/* Category */}
                 {categories.length > 0 && (
                     <div style={filterSectionStyle}>
-                        <button onClick={() => toggleSection("category")} style={sectionHeaderStyle} type="button">
+                        <button
+                            onClick={() => toggleSection("category")}
+                            style={sectionHeaderStyle}
+                        >
                             <span style={sectionTitleStyle}>Category</span>
-                            <span style={chevronStyle}>{expandedSections.category ? "−" : "+"}</span>
+                            <span style={chevronStyle}>
+                                {expandedSections.category ? "−" : "+"}
+                            </span>
                         </button>
 
                         {expandedSections.category && (
@@ -194,11 +231,15 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                                         <input
                                             type="checkbox"
                                             checked={selectedCategories.includes(cat)}
-                                            onChange={() => setSelectedCategories((a) => toggle(a, cat))}
+                                            onChange={() =>
+                                                setSelectedCategories((a) => toggle(a, cat))
+                                            }
                                             style={checkboxInputStyle}
                                         />
                                         <span style={checkboxTextStyle}>{cat}</span>
-                                        <span style={countStyle}>({countsByCategory.get(cat) || 0})</span>
+                                        <span style={countStyle}>
+                                            ({countsByCategory.get(cat) || 0})
+                                        </span>
                                     </label>
                                 ))}
                             </div>
@@ -207,37 +248,50 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                 )}
             </aside>
 
-            <section style={resultsStyle} className="filter-results">
+            <section style={resultsStyle}>
                 {filtered.length > 0 ? (
-                    <div style={gridStyle} className="stones-grid">
+                    <div style={gridStyle}>
                         {filtered.map((s, index) => {
                             const cover = s.images?.[0];
                             return (
                                 <Reveal key={s._id} delayMs={index * 60}>
-                                    <Link href={`/stones/id/${encodeURIComponent(s._id)}`} style={cardStyle} className="stone-card">
-                                        <div style={imageFrameStyle} className="stone-image-frame">
+                                    <Link
+                                        href={`/stones/id/${encodeURIComponent(s._id)}`}
+                                        style={cardStyle}
+                                    >
+                                        <div style={imageFrameStyle}>
                                             {cover ? (
                                                 <Image
-                                                    src={urlFor(cover).width(800).height(800).fit("max").url()}
+                                                    src={urlFor(cover)
+                                                        .width(800)
+                                                        .height(800)
+                                                        .fit("max")
+                                                        .url()}
                                                     alt={s.name}
                                                     width={800}
                                                     height={800}
                                                     style={imageStyle}
-                                                    className="stone-image"
                                                 />
                                             ) : (
-                                                <div style={noImageStyle}>No image available</div>
+                                                <div style={noImageStyle}>
+                                                    No image available
+                                                </div>
                                             )}
                                         </div>
 
                                         <div style={cardContentStyle}>
                                             <div style={cardHeaderStyle}>
                                                 <div style={stoneNameStyle}>{s.name}</div>
-                                                {s.category && <div style={stoneCategoryStyle}>{s.category}</div>}
+                                                {s.category && (
+                                                    <div style={stoneCategoryStyle}>
+                                                        {s.category}
+                                                    </div>
+                                                )}
                                             </div>
                                             <div style={stoneMetaStyle}>
                                                 {s.origin || "Origin undisclosed"}
-                                                {typeof s.carat === "number" && ` · ${s.carat} ct`}
+                                                {typeof s.carat === "number" &&
+                                                    ` · ${s.carat} ct`}
                                             </div>
                                         </div>
                                     </Link>

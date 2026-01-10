@@ -49,16 +49,27 @@ export default async function Page() {
                 </div>
 
                 {/* Minimal Text Section Below Image */}
+                {/* Minimal Text Section Below Image */}
                 <div style={heroTextSectionStyle}>
                     <div style={heroContentStyle}>
                         <Reveal delayMs={0}>
-                            <div style={brandStyle}>CEYLON GEM CO.</div>
+                            <h1 style={brandHeadingStyle}>Ceylon Gem Co.</h1>
                         </Reveal>
+
                         <Reveal delayMs={100}>
-                            <h3 style={h1Style}>Fine gemstones sourced in Ceylon and distributed across global markets.</h3>
+                            <div
+                                style={{
+                                    ...brandStyle,
+                                    marginTop: 14,   // space between name and tagline
+                                    marginBottom: 0 // keep layout tight after tagline
+                                }}
+                            >
+                                Fine gemstones sourced in Ceylon and distributed across global markets
+                            </div>
                         </Reveal>
                     </div>
                 </div>
+
             </section>
 
             {/* COLLECTION SECTION - Immediately visible */}
@@ -190,6 +201,15 @@ const brandStyle: React.CSSProperties = {
     color: "rgba(26, 26, 26, 0.5)",
     marginBottom: 20,
 };
+
+const brandHeadingStyle: React.CSSProperties = {
+    ...brandStyle,
+    fontSize: "clamp(28px, 3.8vw, 50px)",
+    letterSpacing: "0.2em", // slightly tighter for large text
+    marginBottom: 0,
+    color: "#1a1a1a",
+};
+
 
 const h1Style: React.CSSProperties = {
     fontSize: "clamp(32px, 4vw, 48px)",
