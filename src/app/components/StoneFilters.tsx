@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { urlFor } from "@/sanity/lib/image";
 import Reveal from "@/app/components/Reveal";
 
@@ -20,56 +20,31 @@ function uniqSorted(values: (string | undefined)[]) {
     return Array.from(new Set(values.filter(Boolean) as string[])).sort((a, b) => a.localeCompare(b));
 }
 
-function clamp(n: number, min: number, max: number) {
-    return Math.max(min, Math.min(max, n));
-}
-
 export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
-    // Default options that should always be available
     const defaultLocations = ["Sri Lanka", "USA"];
     const defaultCategories = ["Sapphire", "Ruby", "Emerald", "Spinel", "Tourmaline", "Other"];
 
-    // Facet options - merge with defaults
     const locations = useMemo(() => {
         const fromData = uniqSorted(stones.map((s) => s.origin));
-        const merged = Array.from(new Set([...defaultLocations, ...fromData])).sort((a, b) =>
-            a.localeCompare(b)
-        );
-        return merged;
+        return Array.from(new Set([...defaultLocations, ...fromData])).sort((a, b) => a.localeCompare(b));
     }, [stones]);
 
     const categories = useMemo(() => {
         const fromData = uniqSorted(stones.map((s) => s.category));
-        const merged = Array.from(new Set([...defaultCategories, ...fromData])).sort((a, b) =>
-            a.localeCompare(b)
-        );
-        return merged;
+        return Array.from(new Set([...defaultCategories, ...fromData])).sort((a, b) => a.localeCompare(b));
     }, [stones]);
 
-    // Range bounds
-    const caratMinMax = useMemo(() => {
-        const nums = stones.map((s) => s.carat).filter((n): n is number => typeof n === "number");
-        if (nums.length === 0) return { min: 0, max: 23 };
-        const maxCarat = Math.ceil(Math.max(...nums));
-        return { min: 0, max: Math.max(maxCarat, 23) };
-    }, [stones]);
-
-    // Filter state - initialize with full ranges so all items show by default
     const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-    const [caratRange, setCaratRange] = useState<[number, number]>([0, caratMinMax.max]);
 
-    // Collapsible sections
+    // Slider: 1..15, step 1
+    const [minCarat, setMinCarat] = useState<number>(1);
+
     const [expandedSections, setExpandedSections] = useState({
         location: true,
         carat: true,
         category: true,
     });
-
-    // Update ranges when data changes to ensure all items are shown by default
-    useEffect(() => {
-        setCaratRange([0, caratMinMax.max]);
-    }, [caratMinMax.max]);
 
     function toggle(arr: string[], v: string) {
         return arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
@@ -89,18 +64,12 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                 if (!s.category || !selectedCategories.includes(s.category)) return false;
             }
 
-            // Carat filter - stones without carat values show when using default range
-            if (typeof s.carat === "number") {
-                if (s.carat < caratRange[0] || s.carat > caratRange[1]) return false;
-            } else {
-                // No carat - only exclude if user has actively filtered (not at default)
-                const isCaratFiltered = caratRange[0] !== 0 || caratRange[1] !== caratMinMax.max;
-                if (isCaratFiltered) return false;
-            }
+            if (typeof s.carat !== "number") return false;
+            if (s.carat < minCarat) return false;
 
             return true;
         });
-    }, [stones, selectedLocations, selectedCategories, caratRange, caratMinMax.max]);
+    }, [stones, selectedLocations, selectedCategories, minCarat]);
 
     const countsByLocation = useMemo(() => {
         const m = new Map<string, number>();
@@ -123,18 +92,17 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
     function resetAll() {
         setSelectedLocations([]);
         setSelectedCategories([]);
-        setCaratRange([0, caratMinMax.max]);
+        setMinCarat(1);
     }
 
     const hasActiveFilters =
-        selectedLocations.length > 0 ||
-        selectedCategories.length > 0 ||
-        caratRange[0] !== 0 ||
-        caratRange[1] !== caratMinMax.max;
+        selectedLocations.length > 0 || selectedCategories.length > 0 || minCarat !== 1;
+
+    // ✅ numbers under the bar: 1 2 3 ... 15
+    const ticks = useMemo(() => Array.from({ length: 15 }, (_, i) => i + 1), []);
 
     return (
         <div style={wrapStyle} className="stones-filter-wrap">
-            {/* SIDEBAR */}
             <aside style={sidebarStyle} className="filter-sidebar">
                 <div style={sidebarHeaderStyle}>
                     <h3 style={sidebarTitleStyle}>Refine Selection</h3>
@@ -172,54 +140,37 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                     </div>
                 )}
 
-                {/* Carat Weight */}
+                {/* Weight */}
                 <div style={filterSectionStyle}>
                     <button onClick={() => toggleSection("carat")} style={sectionHeaderStyle} type="button">
-                        <span style={sectionTitleStyle}>Carat Weight</span>
+                        <span style={sectionTitleStyle}>Weight</span>
                         <span style={chevronStyle}>{expandedSections.carat ? "−" : "+"}</span>
                     </button>
 
                     {expandedSections.carat && (
                         <div style={sectionContentStyle}>
-                            <div style={rangeInputsStyle}>
-                                <input
-                                    type="number"
-                                    value={caratRange[0]}
-                                    onChange={(e) =>
-                                        setCaratRange(([a, b]) => [clamp(Number(e.target.value), 0, b), b])
-                                    }
-                                    style={rangeInputStyle}
-                                    min={0}
-                                    max={caratMinMax.max}
-                                    step={0.1}
-                                />
-                                <span style={rangeSeparatorStyle}>−</span>
-                                <input
-                                    type="number"
-                                    value={caratRange[1]}
-                                    onChange={(e) =>
-                                        setCaratRange(([a, b]) => [a, clamp(Number(e.target.value), a, caratMinMax.max)])
-                                    }
-                                    style={rangeInputStyle}
-                                    min={0}
-                                    max={caratMinMax.max}
-                                    step={0.1}
-                                />
+                            <div style={sliderTopRowStyle}>
+                                <span style={sliderLabelStyle}>Minimum</span>
+                                <span style={sliderValueStyle}>{minCarat} ct</span>
                             </div>
 
-                            <div style={sliderContainerStyle}>
-                                <input
-                                    type="range"
-                                    min={0}
-                                    max={caratMinMax.max}
-                                    step={0.1}
-                                    value={caratRange[0]}
-                                    onChange={(e) =>
-                                        setCaratRange(([a, b]) => [Math.min(Number(e.target.value), b), b])
-                                    }
-                                    style={sliderStyle}
-                                    className="range-slider"
-                                />
+                            <input
+                                type="range"
+                                min={1}
+                                max={15}
+                                step={1}
+                                value={minCarat}
+                                onChange={(e) => setMinCarat(Number(e.target.value))}
+                                style={sliderStyle}
+                            />
+
+                            {/* ✅ tick labels: 1 2 3 ... 15 */}
+                            <div style={tickRowStyle} aria-hidden="true">
+                                {ticks.map((n) => (
+                                    <span key={n} style={tickTextStyle}>
+                    {n}
+                  </span>
+                                ))}
                             </div>
                         </div>
                     )}
@@ -253,21 +204,14 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                 )}
             </aside>
 
-            {/* RESULTS */}
             <section style={resultsStyle} className="filter-results">
-                {/* Removed the header that shows total stone count */}
-
                 {filtered.length > 0 ? (
                     <div style={gridStyle} className="stones-grid">
                         {filtered.map((s, index) => {
                             const cover = s.images?.[0];
                             return (
                                 <Reveal key={s._id} delayMs={index * 60}>
-                                    <Link
-                                        href={`/stones/id/${encodeURIComponent(s._id)}`}
-                                        style={cardStyle}
-                                        className="stone-card"
-                                    >
+                                    <Link href={`/stones/id/${encodeURIComponent(s._id)}`} style={cardStyle} className="stone-card">
                                         <div style={imageFrameStyle} className="stone-image-frame">
                                             {cover ? (
                                                 <Image
@@ -427,32 +371,23 @@ const countStyle: React.CSSProperties = {
     fontWeight: 300,
 };
 
-const rangeInputsStyle: React.CSSProperties = {
+const sliderTopRowStyle: React.CSSProperties = {
     display: "flex",
-    alignItems: "center",
+    alignItems: "baseline",
+    justifyContent: "space-between",
     gap: 12,
-    marginBottom: 16,
 };
 
-const rangeInputStyle: React.CSSProperties = {
-    flex: 1,
-    padding: "10px 12px",
-    border: "1px solid rgba(10, 10, 10, 0.16)",
-    fontSize: 14,
-    fontFamily: "inherit",
+const sliderLabelStyle: React.CSSProperties = {
+    fontSize: 13,
+    color: "rgba(10, 10, 10, 0.62)",
+    fontWeight: 300,
+};
+
+const sliderValueStyle: React.CSSProperties = {
+    fontSize: 13,
     color: "#0a0a0a",
-    backgroundColor: "rgba(10, 10, 10, 0.02)",
-    transition: "border-color 0.3s ease",
-};
-
-const rangeSeparatorStyle: React.CSSProperties = {
-    color: "rgba(10, 10, 10, 0.48)",
-    fontSize: 14,
-};
-
-const sliderContainerStyle: React.CSSProperties = {
-    position: "relative",
-    paddingTop: 8,
+    fontWeight: 400,
 };
 
 const sliderStyle: React.CSSProperties = {
@@ -460,6 +395,22 @@ const sliderStyle: React.CSSProperties = {
     height: 2,
     cursor: "pointer",
     accentColor: "#0a0a0a",
+};
+
+/* ✅ tick row */
+const tickRowStyle: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: "repeat(15, 1fr)",
+    gap: 0,
+    marginTop: 8,
+};
+
+const tickTextStyle: React.CSSProperties = {
+    fontSize: 10,
+    color: "rgba(10, 10, 10, 0.42)",
+    textAlign: "center",
+    lineHeight: 1,
+    userSelect: "none",
 };
 
 const resultsStyle: React.CSSProperties = {

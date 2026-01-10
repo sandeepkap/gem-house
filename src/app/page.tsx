@@ -52,10 +52,10 @@ export default async function Page() {
                 <div style={heroTextSectionStyle}>
                     <div style={heroContentStyle}>
                         <Reveal delayMs={0}>
-                            <div style={brandStyle}>RANASINGHE & CO.</div>
+                            <div style={brandStyle}>CEYLON GEM CO.</div>
                         </Reveal>
                         <Reveal delayMs={100}>
-                            <h1 style={h1Style}>Fine Gemstones, Private Trade</h1>
+                            <h3 style={h1Style}>Fine gemstones sourced in Ceylon and distributed across global markets.</h3>
                         </Reveal>
                     </div>
                 </div>
@@ -116,7 +116,7 @@ export default async function Page() {
                     </Reveal>
                 </div>
                 <div style={footerStyle}>
-                    © {new Date().getFullYear()} Ranasinghe & Co. — Private sourcing by appointment
+                    © {new Date().getFullYear()} CEYLON GEM COMPANY — Private sourcing by appointment
                 </div>
             </section>
         </div>

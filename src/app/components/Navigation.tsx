@@ -62,7 +62,7 @@ export default function Navigation() {
                             className="company-name-link"
                         >
               <span style={companyNameStyle} className="company-name">
-                RANASINGHE &amp; CO.
+                CEYLON GEM CO.
               </span>
                         </Link>
 

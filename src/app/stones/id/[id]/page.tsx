@@ -1,6 +1,6 @@
+// src/app/stones/id/[id]/page.tsx
 export const revalidate = 0;
 
-import Image from "next/image";
 import Link from "next/link";
 import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
@@ -37,10 +37,17 @@ function buildWhatsAppLink(phoneDigitsOnly: string, stoneName: string) {
     return `https://wa.me/${safePhone}?text=${encodeURIComponent(text)}`;
 }
 
-async function getStoneById(id: string): Promise<Stone | null> {
+async function getStoneById(idRaw: string): Promise<Stone | null> {
+    const id = String(idRaw || "").trim();
+    if (!id) return null;
+
+    // Support both published + drafts without changing your link mapping
+    const draftId = id.startsWith("drafts.") ? id : `drafts.${id}`;
+    const publishedId = id.startsWith("drafts.") ? id.replace(/^drafts\./, "") : id;
+
     return client.fetch(
         `
-    *[_type == "stone" && _id == $id][0]{
+    *[_type == "stone" && (_id == $publishedId || _id == $draftId)][0]{
       _id,
       name,
       category,
@@ -58,16 +65,14 @@ async function getStoneById(id: string): Promise<Stone | null> {
       comments
     }
   `,
-        { id }
+        { publishedId, draftId }
     );
 }
 
 function formatPrice(stone: Stone) {
     const por = Boolean(stone.priceOnRequest);
     const priceNum =
-        typeof stone.price === "number" && Number.isFinite(stone.price)
-            ? stone.price
-            : null;
+        typeof stone.price === "number" && Number.isFinite(stone.price) ? stone.price : null;
 
     if (por || priceNum === null) return "Price on request";
 
@@ -94,6 +99,7 @@ export default async function StoneByIdPage({
                                             }: {
     params: Promise<{ id: string }>;
 }) {
+    // Keep your existing mapping
     const { id } = await params;
     const decodedId = decodeURIComponent(id);
 
@@ -121,9 +127,9 @@ export default async function StoneByIdPage({
 
     const dims = formatDimensions(stone.dimensions);
 
-    // Build full-size image URLs on the server, pass strings to client gallery
+    // Mobile-friendly URLs
     const imageUrls = (stone.images || []).map((img: any) =>
-        urlFor(img).width(2400).fit("max").url()
+        urlFor(img).width(1600).fit("max").auto("format").url()
     );
 
     return (
@@ -134,8 +140,47 @@ export default async function StoneByIdPage({
                 </Link>
             </nav>
 
-            <div style={contentWrapperStyle}>
-                <aside style={detailsColumnStyle}>
+            {/* Mobile: photos first. Desktop: details first + sticky */}
+            <style>{`
+        /* MOBILE (default): photos first */
+        .stone-layout {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 48px;
+          align-items: start;
+        }
+        .stone-gallery {
+          order: 1;
+        }
+        .stone-details {
+          order: 2;
+          position: static;
+        }
+
+        /* DESKTOP */
+        @media (min-width: 960px) {
+          .stone-layout {
+            grid-template-columns: 400px 1fr;
+            gap: 80px;
+            align-items: start;
+          }
+          .stone-details {
+            order: 1;
+            position: sticky;
+            top: 80px;
+          }
+          .stone-gallery {
+            order: 2;
+          }
+        }
+      `}</style>
+
+            <div style={contentWrapperStyle} className="stone-layout">
+                <section style={galleryColumnStyle} className="stone-gallery">
+                    <StoneGallery stoneName={stone.name} imageUrls={imageUrls} />
+                </section>
+
+                <aside style={detailsColumnStyle} className="stone-details">
                     <Reveal delayMs={0}>
                         <div style={kickerStyle}>{stone.category}</div>
                     </Reveal>
@@ -238,15 +283,10 @@ export default async function StoneByIdPage({
                         </div>
                     </Reveal>
                 </aside>
-
-                {/* Client gallery (click to full view) */}
-                <section style={galleryColumnStyle}>
-                    <StoneGallery stoneName={stone.name} imageUrls={imageUrls} />
-                </section>
             </div>
 
             <footer style={footerStyle}>
-                © {new Date().getFullYear()} Ranasinghe & Co. — Private sourcing by appointment
+                © {new Date().getFullYear()} CEYLON GEM COMPANY — Private sourcing by appointment
             </footer>
         </main>
     );
@@ -274,13 +314,9 @@ const navLinkStyle: React.CSSProperties = {
 const contentWrapperStyle: React.CSSProperties = {
     maxWidth: 1400,
     margin: "0 auto",
-    display: "grid",
-    gridTemplateColumns: "400px 1fr",
-    gap: 80,
-    alignItems: "start",
 };
 
-const detailsColumnStyle: React.CSSProperties = { position: "sticky", top: 80 };
+const detailsColumnStyle: React.CSSProperties = {};
 
 const kickerStyle: React.CSSProperties = {
     fontSize: 10,
@@ -382,7 +418,7 @@ const contactNoteStyle: React.CSSProperties = {
     letterSpacing: "0.01em",
 };
 
-const galleryColumnStyle: React.CSSProperties = { width: "100%" };
+const galleryColumnStyle: React.CSSProperties = { width: "100%", minWidth: 0 };
 
 const footerStyle: React.CSSProperties = {
     maxWidth: 1400,

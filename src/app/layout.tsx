@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-    title: "Ranasinghe & Co. — Fine Gemstones Private Trade",
+    title: "Ceylon Gem Company. — Fine Gemstones Private Trade",
     description: "An understated collection of fine gemstones. Sapphires, rubies, and emeralds selected for color, proportion, and provenance. Offered strictly by appointment.",
 };
 

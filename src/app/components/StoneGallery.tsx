@@ -14,11 +14,15 @@ export default function StoneGallery({
 }) {
     const [active, setActive] = useState<string | null>(null);
 
+    if (!imageUrls || imageUrls.length === 0) {
+        return <div style={{ color: "rgba(250, 250, 250, 0.55)" }}>No images available.</div>;
+    }
+
     return (
         <>
             <div style={galleryGridStyle}>
                 {imageUrls.map((src, idx) => (
-                    <Reveal key={src} delayMs={100 + idx * 80}>
+                    <Reveal key={`${src}-${idx}`} delayMs={100 + idx * 80}>
                         <button
                             type="button"
                             onClick={() => setActive(src)}
@@ -31,6 +35,7 @@ export default function StoneGallery({
                                     alt={`${stoneName} view ${idx + 1}`}
                                     width={1200}
                                     height={1200}
+                                    sizes="(max-width: 960px) 100vw, 50vw"
                                     style={imageStyle}
                                 />
                             </div>
