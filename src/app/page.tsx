@@ -3,7 +3,6 @@ import { client } from "@/sanity/lib/client";
 import Reveal from "@/app/components/Reveal";
 import StoneFilters from "@/app/components/StoneFilters";
 import Navigation from "@/app/components/Navigation";
-import HeroWithImage from "@/app/components/HeroWithImage";
 
 type StoneListItem = {
     _id: string;
@@ -36,14 +35,40 @@ export default async function Page() {
         <div style={pageStyle}>
             <Navigation />
 
-            <HeroWithImage imageSrc="/background.png" />
+            {/* COMPACT HERO - No text over image */}
+            <section style={heroSectionStyle}>
+                {/* Gemstone Image Banner - Horizontal, no text overlay */}
+                <div style={imageContainerStyle}>
+                    <img
+                        src="/background.jpg"
+                        alt="Fine Gemstones"
+                        style={bannerImageStyle}
+                    />
+                    {/* Subtle gradient overlay at bottom for blend */}
+                    <div style={imageOverlayStyle} />
+                </div>
 
+                {/* Minimal Text Section Below Image */}
+                <div style={heroTextSectionStyle}>
+                    <div style={heroContentStyle}>
+                        <Reveal delayMs={0}>
+                            <div style={brandStyle}>RANASINGHE & CO.</div>
+                        </Reveal>
+                        <Reveal delayMs={100}>
+                            <h1 style={h1Style}>Fine Gemstones, Private Trade</h1>
+                        </Reveal>
+                    </div>
+                </div>
+            </section>
+
+            {/* COLLECTION SECTION - Immediately visible */}
             <section id="collection" style={collectionSectionStyle}>
                 <div style={collectionContainerStyle}>
                     <StoneFilters stones={stones} />
                 </div>
             </section>
 
+            {/* CONTACT SECTION */}
             <section id="contact" style={contactSectionStyle}>
                 <div style={contactContainerStyle}>
                     <Reveal delayMs={0}>
@@ -103,14 +128,83 @@ export default async function Page() {
 const pageStyle: React.CSSProperties = {
     fontFamily: `"Crimson Pro", "Cormorant Garamond", "EB Garamond", Georgia, serif`,
     color: "#1a1a1a",
-    backgroundColor: "#F9F8F6", // Consistent warm parchment
+    backgroundColor: "#F9F8F6",
     minHeight: "100vh",
 };
 
+// COMPACT HERO SECTION
+const heroSectionStyle: React.CSSProperties = {
+    backgroundColor: "#F9F8F6",
+    position: "relative",
+};
+
+// Image Container - Horizontal banner style
+const imageContainerStyle: React.CSSProperties = {
+    width: "100%",
+    height: "50vh", // Half viewport - short and elegant
+    maxHeight: 500,
+    minHeight: 350,
+    position: "relative",
+    overflow: "hidden",
+    marginTop: 60, // Push image lower, below the navigation
+};
+
+// Banner Image - Fills width, crops height if needed
+const bannerImageStyle: React.CSSProperties = {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    objectPosition: "center 60%",
+    display: "block",
+    filter: "none", // No filters for crisp quality
+};
+
+// Subtle gradient at bottom for seamless transition - much more subtle
+const imageOverlayStyle: React.CSSProperties = {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: "15%", // Reduced from 30% - less overlay
+    background: "linear-gradient(to bottom, transparent, rgba(249, 248, 246, 0.3))", // More transparent
+    pointerEvents: "none",
+};
+
+// Text Section Below Image
+const heroTextSectionStyle: React.CSSProperties = {
+    backgroundColor: "#F9F8F6",
+    padding: "60px 5vw",
+};
+
+const heroContentStyle: React.CSSProperties = {
+    maxWidth: 1400,
+    margin: "0 auto",
+    textAlign: "center",
+};
+
+const brandStyle: React.CSSProperties = {
+    fontSize: 10,
+    letterSpacing: "0.32em",
+    textTransform: "uppercase",
+    fontWeight: 400,
+    color: "rgba(26, 26, 26, 0.5)",
+    marginBottom: 20,
+};
+
+const h1Style: React.CSSProperties = {
+    fontSize: "clamp(32px, 4vw, 48px)",
+    lineHeight: 1.2,
+    fontWeight: 400,
+    letterSpacing: "-0.01em",
+    color: "#1a1a1a",
+    margin: 0,
+};
+
+// COLLECTION SECTION - Compact, shows stones immediately
 const collectionSectionStyle: React.CSSProperties = {
     backgroundColor: "#F9F8F6",
     color: "#1a1a1a",
-    padding: "80px 5vw 160px",
+    padding: "60px 5vw 120px",
     position: "relative",
 };
 
@@ -119,10 +213,11 @@ const collectionContainerStyle: React.CSSProperties = {
     margin: "0 auto",
 };
 
+// CONTACT SECTION
 const contactSectionStyle: React.CSSProperties = {
-    backgroundColor: "#111111", // Solid deep charcoal for contrast
+    backgroundColor: "#111111",
     color: "#F9F8F6",
-    padding: "140px 5vw 80px",
+    padding: "120px 5vw 80px",
     position: "relative",
 };
 
@@ -183,6 +278,7 @@ const contactValueLinkStyle: React.CSSProperties = {
     borderBottom: "1px solid rgba(249, 248, 246, 0.1)",
     paddingBottom: 4,
     width: "fit-content",
+    transition: "opacity 0.3s ease",
 };
 
 const contactValueStyle: React.CSSProperties = {
