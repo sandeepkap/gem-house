@@ -37,8 +37,8 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
     const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-    // Slider: 1..15, step 1
-    const [minCarat, setMinCarat] = useState<number>(1);
+    // ✅ Slider: 0..8, step 1
+    const [minCarat, setMinCarat] = useState<number>(0);
 
     const [expandedSections, setExpandedSections] = useState({
         location: true,
@@ -64,8 +64,11 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                 if (!s.category || !selectedCategories.includes(s.category)) return false;
             }
 
-            if (typeof s.carat !== "number") return false;
-            if (s.carat < minCarat) return false;
+            // Only enforce carat filter if stone has carat; allow missing carat when minCarat is 0
+            if (minCarat > 0) {
+                if (typeof s.carat !== "number") return false;
+                if (s.carat < minCarat) return false;
+            }
 
             return true;
         });
@@ -92,14 +95,14 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
     function resetAll() {
         setSelectedLocations([]);
         setSelectedCategories([]);
-        setMinCarat(1);
+        setMinCarat(0);
     }
 
     const hasActiveFilters =
-        selectedLocations.length > 0 || selectedCategories.length > 0 || minCarat !== 1;
+        selectedLocations.length > 0 || selectedCategories.length > 0 || minCarat !== 0;
 
-    // ✅ numbers under the bar: 1 2 3 ... 15
-    const ticks = useMemo(() => Array.from({ length: 15 }, (_, i) => i + 1), []);
+    // ✅ tick labels: 0 1 2 ... 8
+    const ticks = useMemo(() => Array.from({ length: 9 }, (_, i) => i), []);
 
     return (
         <div style={wrapStyle} className="stones-filter-wrap">
@@ -156,20 +159,20 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
 
                             <input
                                 type="range"
-                                min={1}
-                                max={15}
+                                min={0}
+                                max={8}
                                 step={1}
                                 value={minCarat}
                                 onChange={(e) => setMinCarat(Number(e.target.value))}
                                 style={sliderStyle}
                             />
 
-                            {/* ✅ tick labels: 1 2 3 ... 15 */}
+                            {/* ✅ tick labels: 0..8 */}
                             <div style={tickRowStyle} aria-hidden="true">
                                 {ticks.map((n) => (
                                     <span key={n} style={tickTextStyle}>
-                    {n}
-                  </span>
+                                        {n}
+                                    </span>
                                 ))}
                             </div>
                         </div>
@@ -397,10 +400,10 @@ const sliderStyle: React.CSSProperties = {
     accentColor: "#0a0a0a",
 };
 
-/* ✅ tick row */
+/* ✅ tick row: 0..8 */
 const tickRowStyle: React.CSSProperties = {
     display: "grid",
-    gridTemplateColumns: "repeat(15, 1fr)",
+    gridTemplateColumns: "repeat(9, 1fr)",
     gap: 0,
     marginTop: 8,
 };
