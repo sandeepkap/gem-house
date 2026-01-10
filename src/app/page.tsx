@@ -38,38 +38,38 @@ export default async function Page() {
             {/* COMPACT HERO - No text over image */}
             <section style={heroSectionStyle}>
                 {/* Gemstone Image Banner - Horizontal, no text overlay */}
-                <div style={imageContainerStyle}>
+                <div style={imageContainerStyle} className="hero-banner-container">
                     <img
                         src="/background.jpg"
                         alt="Fine Gemstones"
                         style={bannerImageStyle}
+                        className="hero-banner-image"
                     />
                     {/* Subtle gradient overlay at bottom for blend */}
                     <div style={imageOverlayStyle} />
                 </div>
 
                 {/* Minimal Text Section Below Image */}
-                {/* Minimal Text Section Below Image */}
-                <div style={heroTextSectionStyle}>
+                <div style={heroTextSectionStyle} className="hero-text-section">
                     <div style={heroContentStyle}>
                         <Reveal delayMs={0}>
-                            <h1 style={brandHeadingStyle}>Ceylon Gem Co.</h1>
+                            <h1 style={brandHeadingStyle} className="hero-h1">Ceylon Gem Co.</h1>
                         </Reveal>
 
                         <Reveal delayMs={100}>
                             <div
                                 style={{
                                     ...brandStyle,
-                                    marginTop: 14,   // space between name and tagline
-                                    marginBottom: 0 // keep layout tight after tagline
+                                    marginTop: 14,
+                                    marginBottom: 0
                                 }}
+                                className="hero-brand-text"
                             >
                                 Fine gemstones sourced in Ceylon and distributed across global markets
                             </div>
                         </Reveal>
                     </div>
                 </div>
-
             </section>
 
             {/* COLLECTION SECTION - Immediately visible */}
@@ -143,45 +143,40 @@ const pageStyle: React.CSSProperties = {
     minHeight: "100vh",
 };
 
-// COMPACT HERO SECTION
 const heroSectionStyle: React.CSSProperties = {
     backgroundColor: "#F9F8F6",
     position: "relative",
 };
 
-// Image Container - Horizontal banner style
 const imageContainerStyle: React.CSSProperties = {
     width: "100%",
-    height: "50vh", // Half viewport - short and elegant
+    height: "50vh",
     maxHeight: 500,
     minHeight: 350,
     position: "relative",
     overflow: "hidden",
-    marginTop: 60, // Push image lower, below the navigation
+    marginTop: 60,
 };
 
-// Banner Image - Fills width, crops height if needed
 const bannerImageStyle: React.CSSProperties = {
     width: "100%",
     height: "100%",
     objectFit: "cover",
     objectPosition: "center 60%",
     display: "block",
-    filter: "none", // No filters for crisp quality
+    filter: "none",
 };
 
-// Subtle gradient at bottom for seamless transition - much more subtle
 const imageOverlayStyle: React.CSSProperties = {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    height: "15%", // Reduced from 30% - less overlay
-    background: "linear-gradient(to bottom, transparent, rgba(249, 248, 246, 0.3))", // More transparent
+    height: "15%",
+    background: "linear-gradient(to bottom, transparent, rgba(249, 248, 246, 0.3))",
     pointerEvents: "none",
 };
 
-// Text Section Below Image
 const heroTextSectionStyle: React.CSSProperties = {
     backgroundColor: "#F9F8F6",
     padding: "60px 5vw",
@@ -205,11 +200,10 @@ const brandStyle: React.CSSProperties = {
 const brandHeadingStyle: React.CSSProperties = {
     ...brandStyle,
     fontSize: "clamp(28px, 3.8vw, 50px)",
-    letterSpacing: "0.2em", // slightly tighter for large text
+    letterSpacing: "0.2em",
     marginBottom: 0,
     color: "#1a1a1a",
 };
-
 
 const h1Style: React.CSSProperties = {
     fontSize: "clamp(32px, 4vw, 48px)",
@@ -220,7 +214,6 @@ const h1Style: React.CSSProperties = {
     margin: 0,
 };
 
-// COLLECTION SECTION - Compact, shows stones immediately
 const collectionSectionStyle: React.CSSProperties = {
     backgroundColor: "#F9F8F6",
     color: "#1a1a1a",
@@ -233,7 +226,6 @@ const collectionContainerStyle: React.CSSProperties = {
     margin: "0 auto",
 };
 
-// CONTACT SECTION
 const contactSectionStyle: React.CSSProperties = {
     backgroundColor: "#111111",
     color: "#F9F8F6",

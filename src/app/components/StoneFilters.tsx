@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { urlFor } from "@/sanity/lib/image";
 import Reveal from "@/app/components/Reveal";
 
@@ -22,35 +22,53 @@ function uniqSorted(values: (string | undefined)[]) {
     );
 }
 
+function clamp(n: number, min: number, max: number) {
+    return Math.max(min, Math.min(max, n));
+}
+
 export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
+    // Default options that should always be available
     const defaultLocations = ["Sri Lanka", "USA"];
     const defaultCategories = ["Sapphire", "Ruby", "Emerald", "Spinel", "Tourmaline", "Other"];
 
+    // Facet options - merge with defaults
     const locations = useMemo(() => {
         const fromData = uniqSorted(stones.map((s) => s.origin));
-        return Array.from(new Set([...defaultLocations, ...fromData])).sort((a, b) =>
+        const merged = Array.from(new Set([...defaultLocations, ...fromData])).sort((a, b) =>
             a.localeCompare(b)
         );
+        return merged;
     }, [stones]);
 
     const categories = useMemo(() => {
         const fromData = uniqSorted(stones.map((s) => s.category));
-        return Array.from(new Set([...defaultCategories, ...fromData])).sort((a, b) =>
+        const merged = Array.from(new Set([...defaultCategories, ...fromData])).sort((a, b) =>
             a.localeCompare(b)
         );
+        return merged;
     }, [stones]);
 
+    // Range bounds
+    const caratMinMax = useMemo(() => {
+        return { min: 0, max: 8 }; // Fixed range: 0 to 8 carats
+    }, []);
+
+    // Filter state - initialize with full ranges so all items show by default
     const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+    const [caratRange, setCaratRange] = useState<[number, number]>([0, 8]);
 
-    // Slider: 0..8
-    const [minCarat, setMinCarat] = useState<number>(0);
-
+    // Collapsible sections
     const [expandedSections, setExpandedSections] = useState({
         location: true,
         carat: true,
         category: true,
     });
+
+    // Update ranges when data changes to ensure all items are shown by default
+    useEffect(() => {
+        setCaratRange([0, 8]);
+    }, []);
 
     function toggle(arr: string[], v: string) {
         return arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
@@ -60,37 +78,34 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
         setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
     };
 
-    // ---------- CASE-INSENSITIVE NORMALIZATION ----------
-    const selectedLocationsLC = useMemo(
-        () => selectedLocations.map((l) => l.toLowerCase()),
-        [selectedLocations]
-    );
-
-    const selectedCategoriesLC = useMemo(
-        () => selectedCategories.map((c) => c.toLowerCase()),
-        [selectedCategories]
-    );
-
     const filtered = useMemo(() => {
         return stones.filter((s) => {
-            if (selectedLocationsLC.length > 0) {
-                if (!s.origin || !selectedLocationsLC.includes(s.origin.toLowerCase()))
-                    return false;
+            if (selectedLocations.length > 0) {
+                if (!s.origin || !selectedLocations.includes(s.origin)) return false;
             }
 
-            if (selectedCategoriesLC.length > 0) {
-                if (!s.category || !selectedCategoriesLC.includes(s.category.toLowerCase()))
-                    return false;
+            if (selectedCategories.length > 0) {
+                if (!s.category || !selectedCategories.includes(s.category)) return false;
             }
 
-            if (minCarat > 0) {
-                if (typeof s.carat !== "number") return false;
-                if (s.carat < minCarat) return false;
+            // Carat filter - stones without carat values show when using default range
+            if (typeof s.carat === "number") {
+                if (s.carat < caratRange[0] || s.carat > caratRange[1]) return false;
+            } else {
+                // No carat - only exclude if user has actively filtered (not at default)
+                const isCaratFiltered = caratRange[0] !== 0 || caratRange[1] !== 8;
+                if (isCaratFiltered) return false;
             }
 
             return true;
         });
-    }, [stones, selectedLocationsLC, selectedCategoriesLC, minCarat]);
+    }, [
+        stones,
+        selectedLocations,
+        selectedCategories,
+        caratRange,
+        caratMinMax.max,
+    ]);
 
     const countsByLocation = useMemo(() => {
         const m = new Map<string, number>();
@@ -113,21 +128,23 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
     function resetAll() {
         setSelectedLocations([]);
         setSelectedCategories([]);
-        setMinCarat(0);
+        setCaratRange([0, 8]);
     }
 
     const hasActiveFilters =
-        selectedLocations.length > 0 || selectedCategories.length > 0 || minCarat !== 0;
-
-    const ticks = useMemo(() => Array.from({ length: 9 }, (_, i) => i), []);
+        selectedLocations.length > 0 ||
+        selectedCategories.length > 0 ||
+        caratRange[0] !== 0 ||
+        caratRange[1] !== 8;
 
     return (
-        <div style={wrapStyle}>
-            <aside style={sidebarStyle}>
+        <div style={wrapStyle} className="stones-filter-wrap">
+            {/* SIDEBAR */}
+            <aside style={sidebarStyle} className="filter-sidebar">
                 <div style={sidebarHeaderStyle}>
                     <h3 style={sidebarTitleStyle}>Refine Selection</h3>
                     {hasActiveFilters && (
-                        <button onClick={resetAll} style={resetBtnStyle}>
+                        <button onClick={resetAll} style={resetBtnStyle} type="button">
                             Clear All
                         </button>
                     )}
@@ -139,11 +156,10 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                         <button
                             onClick={() => toggleSection("location")}
                             style={sectionHeaderStyle}
+                            type="button"
                         >
                             <span style={sectionTitleStyle}>Location</span>
-                            <span style={chevronStyle}>
-                                {expandedSections.location ? "−" : "+"}
-                            </span>
+                            <span style={chevronStyle}>{expandedSections.location ? "−" : "+"}</span>
                         </button>
 
                         {expandedSections.location && (
@@ -153,15 +169,11 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                                         <input
                                             type="checkbox"
                                             checked={selectedLocations.includes(loc)}
-                                            onChange={() =>
-                                                setSelectedLocations((a) => toggle(a, loc))
-                                            }
+                                            onChange={() => setSelectedLocations((a) => toggle(a, loc))}
                                             style={checkboxInputStyle}
                                         />
                                         <span style={checkboxTextStyle}>{loc}</span>
-                                        <span style={countStyle}>
-                                            ({countsByLocation.get(loc) || 0})
-                                        </span>
+                                        <span style={countStyle}>({countsByLocation.get(loc) || 0})</span>
                                     </label>
                                 ))}
                             </div>
@@ -169,43 +181,69 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                     </div>
                 )}
 
-                {/* Weight */}
+                {/* Carat Weight */}
                 <div style={filterSectionStyle}>
                     <button
                         onClick={() => toggleSection("carat")}
                         style={sectionHeaderStyle}
+                        type="button"
                     >
-                        <span style={sectionTitleStyle}>Weight</span>
-                        <span style={chevronStyle}>
-                            {expandedSections.carat ? "−" : "+"}
-                        </span>
+                        <span style={sectionTitleStyle}>Carat Weight</span>
+                        <span style={chevronStyle}>{expandedSections.carat ? "−" : "+"}</span>
                     </button>
 
                     {expandedSections.carat && (
                         <div style={sectionContentStyle}>
-                            <div style={sliderTopRowStyle}>
-                                <span style={sliderLabelStyle}>Minimum</span>
-                                <span style={sliderValueStyle}>{minCarat} ct</span>
+                            <div style={rangeInputsStyle}>
+                                <input
+                                    type="number"
+                                    value={caratRange[0]}
+                                    onChange={(e) =>
+                                        setCaratRange(([a, b]) => [clamp(Number(e.target.value), 0, b), b])
+                                    }
+                                    style={rangeInputStyle}
+                                    min={0}
+                                    max={8}
+                                    step={0.5}
+                                />
+                                <span style={rangeSeparatorStyle}>−</span>
+                                <input
+                                    type="number"
+                                    value={caratRange[1]}
+                                    onChange={(e) =>
+                                        setCaratRange(([a, b]) => [a, clamp(Number(e.target.value), a, 8)])
+                                    }
+                                    style={rangeInputStyle}
+                                    min={0}
+                                    max={8}
+                                    step={0.5}
+                                />
                             </div>
 
-                            <input
-                                type="range"
-                                min={0}
-                                max={8}
-                                step={1}
-                                value={minCarat}
-                                onChange={(e) =>
-                                    setMinCarat(Number(e.target.value))
-                                }
-                                style={sliderStyle}
-                            />
+                            <div style={sliderContainerStyle}>
+                                {/* Slider tick marks */}
+                                <div style={sliderTicksStyle}>
+                                    {Array.from({ length: 17 }, (_, i) => i * 0.5).map((value) => (
+                                        <div key={value} style={sliderTickStyle}>
+                                            <div style={sliderTickMarkStyle} />
+                                            {value % 1 === 0 && <div style={sliderTickLabelStyle}>{value}</div>}
+                                        </div>
+                                    ))}
+                                </div>
 
-                            <div style={tickRowStyle}>
-                                {ticks.map((n) => (
-                                    <span key={n} style={tickTextStyle}>
-                                        {n}
-                                    </span>
-                                ))}
+                                {/* Single slider for minimum value */}
+                                <input
+                                    type="range"
+                                    min={0}
+                                    max={8}
+                                    step={0.5}
+                                    value={caratRange[0]}
+                                    onChange={(e) =>
+                                        setCaratRange(([a, b]) => [Math.min(Number(e.target.value), b), b])
+                                    }
+                                    style={sliderStyle}
+                                    className="range-slider"
+                                />
                             </div>
                         </div>
                     )}
@@ -217,11 +255,10 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                         <button
                             onClick={() => toggleSection("category")}
                             style={sectionHeaderStyle}
+                            type="button"
                         >
                             <span style={sectionTitleStyle}>Category</span>
-                            <span style={chevronStyle}>
-                                {expandedSections.category ? "−" : "+"}
-                            </span>
+                            <span style={chevronStyle}>{expandedSections.category ? "−" : "+"}</span>
                         </button>
 
                         {expandedSections.category && (
@@ -231,15 +268,11 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                                         <input
                                             type="checkbox"
                                             checked={selectedCategories.includes(cat)}
-                                            onChange={() =>
-                                                setSelectedCategories((a) => toggle(a, cat))
-                                            }
+                                            onChange={() => setSelectedCategories((a) => toggle(a, cat))}
                                             style={checkboxInputStyle}
                                         />
                                         <span style={checkboxTextStyle}>{cat}</span>
-                                        <span style={countStyle}>
-                                            ({countsByCategory.get(cat) || 0})
-                                        </span>
+                                        <span style={countStyle}>({countsByCategory.get(cat) || 0})</span>
                                     </label>
                                 ))}
                             </div>
@@ -248,34 +281,33 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                 )}
             </aside>
 
-            <section style={resultsStyle}>
+            {/* RESULTS */}
+            <section style={resultsStyle} className="filter-results">
+                <div style={resultsHeaderStyle}>
+                    <div>
+                        <div style={resultsKickerStyle}>Available Now</div>
+                    </div>
+                </div>
+
                 {filtered.length > 0 ? (
-                    <div style={gridStyle}>
+                    <div style={gridStyle} className="stones-grid">
                         {filtered.map((s, index) => {
                             const cover = s.images?.[0];
                             return (
                                 <Reveal key={s._id} delayMs={index * 60}>
-                                    <Link
-                                        href={`/stones/id/${encodeURIComponent(s._id)}`}
-                                        style={cardStyle}
-                                    >
-                                        <div style={imageFrameStyle}>
+                                    <Link href={`/stones/id/${encodeURIComponent(s._id)}`} style={cardStyle} className="stone-card">
+                                        <div style={imageFrameStyle} className="stone-image-frame">
                                             {cover ? (
                                                 <Image
-                                                    src={urlFor(cover)
-                                                        .width(800)
-                                                        .height(800)
-                                                        .fit("max")
-                                                        .url()}
+                                                    src={urlFor(cover).width(800).height(800).fit("max").url()}
                                                     alt={s.name}
                                                     width={800}
                                                     height={800}
                                                     style={imageStyle}
+                                                    className="stone-image"
                                                 />
                                             ) : (
-                                                <div style={noImageStyle}>
-                                                    No image available
-                                                </div>
+                                                <div style={noImageStyle}>No image available</div>
                                             )}
                                         </div>
 
@@ -283,15 +315,12 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                                             <div style={cardHeaderStyle}>
                                                 <div style={stoneNameStyle}>{s.name}</div>
                                                 {s.category && (
-                                                    <div style={stoneCategoryStyle}>
-                                                        {s.category}
-                                                    </div>
+                                                    <div style={stoneCategoryStyle}>{s.category}</div>
                                                 )}
                                             </div>
                                             <div style={stoneMetaStyle}>
                                                 {s.origin || "Origin undisclosed"}
-                                                {typeof s.carat === "number" &&
-                                                    ` · ${s.carat} ct`}
+                                                {typeof s.carat === "number" && ` · ${s.carat} ct`}
                                             </div>
                                         </div>
                                     </Link>
@@ -321,6 +350,8 @@ const wrapStyle: React.CSSProperties = {
     gap: 80,
     alignItems: "start",
 };
+
+// Media queries will override via className
 
 const sidebarStyle: React.CSSProperties = {
     position: "sticky",
@@ -428,50 +459,96 @@ const countStyle: React.CSSProperties = {
     fontWeight: 300,
 };
 
-const sliderTopRowStyle: React.CSSProperties = {
+const rangeInputsStyle: React.CSSProperties = {
     display: "flex",
-    alignItems: "baseline",
-    justifyContent: "space-between",
+    alignItems: "center",
     gap: 12,
+    marginBottom: 16,
 };
 
-const sliderLabelStyle: React.CSSProperties = {
-    fontSize: 13,
-    color: "rgba(10, 10, 10, 0.62)",
-    fontWeight: 300,
-};
-
-const sliderValueStyle: React.CSSProperties = {
-    fontSize: 13,
+const rangeInputStyle: React.CSSProperties = {
+    flex: 1,
+    padding: "10px 12px",
+    border: "1px solid rgba(10, 10, 10, 0.16)",
+    fontSize: 14,
+    fontFamily: "inherit",
     color: "#0a0a0a",
-    fontWeight: 400,
+    backgroundColor: "rgba(10, 10, 10, 0.02)",
+    transition: "border-color 0.3s ease",
+};
+
+const rangeSeparatorStyle: React.CSSProperties = {
+    color: "rgba(10, 10, 10, 0.48)",
+    fontSize: 14,
+};
+
+const sliderContainerStyle: React.CSSProperties = {
+    position: "relative",
+    paddingTop: 32, // Increased from 8 to move slider down more
+    paddingBottom: 8,
+};
+
+const sliderTicksStyle: React.CSSProperties = {
+    display: "flex",
+    justifyContent: "space-between",
+    position: "absolute",
+    width: "100%",
+    top: 0,
+    pointerEvents: "none",
+};
+
+const sliderTickStyle: React.CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    position: "relative",
+};
+
+const sliderTickMarkStyle: React.CSSProperties = {
+    width: 2,
+    height: 8,
+    backgroundColor: "rgba(10, 10, 10, 0.2)",
+    marginBottom: 4,
+};
+
+const sliderTickLabelStyle: React.CSSProperties = {
+    fontSize: 10,
+    color: "rgba(10, 10, 10, 0.5)",
+    fontWeight: 300,
 };
 
 const sliderStyle: React.CSSProperties = {
     width: "100%",
-    height: 2,
+    height: 4,
     cursor: "pointer",
     accentColor: "#0a0a0a",
-};
-
-/* ✅ tick row: 0..8 */
-const tickRowStyle: React.CSSProperties = {
-    display: "grid",
-    gridTemplateColumns: "repeat(9, 1fr)",
-    gap: 0,
-    marginTop: 8,
-};
-
-const tickTextStyle: React.CSSProperties = {
-    fontSize: 10,
-    color: "rgba(10, 10, 10, 0.42)",
-    textAlign: "center",
-    lineHeight: 1,
-    userSelect: "none",
+    WebkitAppearance: "none",
+    appearance: "none",
+    background: "linear-gradient(to right, #0a0a0a 0%, #0a0a0a 100%)",
+    outline: "none",
 };
 
 const resultsStyle: React.CSSProperties = {
     minWidth: 0,
+};
+
+const resultsHeaderStyle: React.CSSProperties = {
+    marginBottom: 48,
+};
+
+const resultsKickerStyle: React.CSSProperties = {
+    fontSize: 10,
+    letterSpacing: "0.26em",
+    textTransform: "uppercase",
+    color: "rgba(10, 10, 10, 0.48)",
+    marginBottom: 8,
+};
+
+const resultsCountStyle: React.CSSProperties = {
+    fontSize: 28,
+    fontWeight: 400,
+    letterSpacing: "-0.01em",
+    color: "#0a0a0a",
 };
 
 const gridStyle: React.CSSProperties = {
@@ -485,8 +562,7 @@ const cardStyle: React.CSSProperties = {
     textDecoration: "none",
     color: "inherit",
     display: "block",
-    transition:
-        "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+    transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
     cursor: "pointer",
 };
 

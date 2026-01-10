@@ -20,7 +20,7 @@ export default function StoneGallery({
 
     return (
         <>
-            <div style={galleryGridStyle}>
+            <div style={galleryGridStyle} className="stone-detail-gallery">
                 {imageUrls.map((src, idx) => (
                     <Reveal key={`${src}-${idx}`} delayMs={100 + idx * 80}>
                         <button
@@ -61,6 +61,7 @@ const imageButtonStyle: React.CSSProperties = {
     background: "transparent",
     textAlign: "left",
     cursor: "zoom-in",
+    width: "100%",
 };
 
 const imageFrameStyle: React.CSSProperties = {
@@ -68,6 +69,7 @@ const imageFrameStyle: React.CSSProperties = {
     background: "rgba(250, 250, 250, 0.02)",
     aspectRatio: "1 / 1",
     overflow: "hidden",
+    width: "100%",
 };
 
 const imageStyle: React.CSSProperties = {
