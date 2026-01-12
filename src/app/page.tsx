@@ -79,6 +79,96 @@ export default async function Page() {
                 </div>
             </section>
 
+            {/* PARTNERS SECTION */}
+            <section style={partnersSectionStyle}>
+                <div style={partnersContainerStyle}>
+                    <Reveal delayMs={0}>
+                        <div style={partnerKickerStyle}>Our Network</div>
+                    </Reveal>
+                    <Reveal delayMs={100}>
+                        <h2 style={partnersHeadingStyle}>People We Work With</h2>
+                    </Reveal>
+                    <Reveal delayMs={200}>
+                        <p style={partnersDescriptionStyle}>
+                            We collaborate with Sri Lanka's most respected gemological laboratories
+                            and certification authorities to ensure authenticity and quality.
+                        </p>
+                    </Reveal>
+
+                    <Reveal delayMs={300}>
+                        <div style={partnersGridStyle} className="partners-grid">
+                            {/* Partner 1 - AIGS */}
+                            <div style={partnerCardStyle} className="partner-card">
+                                <div style={partnerLogoStyle} className="partner-logo">
+                                    <a
+                                        href="https://www.gia.edu/"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                    <img
+                                        src="/GIA.jpg"
+                                        alt="AIGS - Asian Institute of Gemological Sciences"
+                                        style={logoImageStyle}
+                                    />
+                                    </a>
+                                </div>
+                            </div>
+
+                            {/* Partner 2 - AGCL */}
+                            <div style={partnerCardStyle} className="partner-card">
+                                <div style={partnerLogoStyle} className="partner-logo">
+                                    <a
+                                        href="https://www.agclgemlab.com/"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        <img
+                                            src="/AGCL.png"
+                                            alt="AGCL - Asian Gemological Centre & Laboratory"
+                                            style={logoImageStyle}
+                                        />
+                                    </a>
+                                </div>
+                            </div>
+
+                            {/* Partner 3 - RGTL */}
+                            <div style={partnerCardStyle} className="partner-card">
+                                <div style={partnerLogoStyle} className="partner-logo">
+                                    <a
+                                        href="https://www.facebook.com/p/RGTL-Rockland-Gem-Testing-Laboratory-100093904602773/"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        <img
+                                            src="/RGTL.png"
+                                            alt="RGTL - Ratnapura Gem Testing Laboratory"
+                                            style={logoImageStyle}
+                                        />
+                                    </a>
+                                </div>
+                            </div>
+
+                            {/* Partner 4 - Bellerophon */}
+                            <div style={partnerCardStyle} className="partner-card">
+                                <div style={partnerLogoStyle} className="partner-logo">
+                                    <a
+                                        href="https://www.gemlabanalysis.com/"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        <img
+                                            src="/bellerophon.png"
+                                            alt="Bellerophon Gemological Laboratory"
+                                            style={logoImageStyle}
+                                        />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </Reveal>
+                </div>
+            </section>
+
             {/* CONTACT SECTION */}
             <section id="contact" style={contactSectionStyle}>
                 <div style={contactContainerStyle}>
@@ -224,6 +314,86 @@ const collectionSectionStyle: React.CSSProperties = {
 const collectionContainerStyle: React.CSSProperties = {
     maxWidth: 1600,
     margin: "0 auto",
+};
+
+// PARTNERS SECTION
+const partnersSectionStyle: React.CSSProperties = {
+    backgroundColor: "#ffffff",
+    color: "#1a1a1a",
+    padding: "140px 5vw",
+    position: "relative",
+    borderTop: "1px solid rgba(26, 26, 26, 0.08)",
+};
+
+const partnersContainerStyle: React.CSSProperties = {
+    maxWidth: 1200,
+    margin: "0 auto",
+    textAlign: "center",
+};
+
+const partnerKickerStyle: React.CSSProperties = {
+    fontSize: 10,
+    letterSpacing: "0.3em",
+    textTransform: "uppercase",
+    color: "rgba(26, 26, 26, 0.4)",
+    marginBottom: 16,
+};
+
+const partnersHeadingStyle: React.CSSProperties = {
+    fontSize: "clamp(32px, 4vw, 46px)",
+    fontWeight: 400,
+    letterSpacing: "-0.01em",
+    marginBottom: 24,
+    color: "#1a1a1a",
+};
+
+const partnersDescriptionStyle: React.CSSProperties = {
+    fontSize: 17,
+    lineHeight: 1.7,
+    color: "rgba(26, 26, 26, 0.6)",
+    fontWeight: 300,
+    marginBottom: 80,
+    maxWidth: 640,
+    margin: "0 auto 80px",
+};
+
+const partnersGridStyle: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+    gap: 40,
+    maxWidth: 1400,
+    margin: "0 auto",
+};
+
+const partnerCardStyle: React.CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "48px 40px",
+    border: "1px solid rgba(26, 26, 26, 0.08)",
+    backgroundColor: "rgba(249, 248, 246, 0.3)",
+    transition: "all 0.3s ease",
+    minHeight: "180px",
+};
+
+const partnerLogoStyle: React.CSSProperties = {
+    width: "100%",
+    height: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+};
+
+const logoImageStyle: React.CSSProperties = {
+    maxWidth: "100%",
+    maxHeight: "120px",
+    width: "auto",
+    height: "auto",
+    objectFit: "contain",
+    filter: "grayscale(100%)",
+    opacity: 0.7,
+    transition: "all 0.3s ease",
 };
 
 const contactSectionStyle: React.CSSProperties = {
