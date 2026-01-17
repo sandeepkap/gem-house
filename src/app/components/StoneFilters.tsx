@@ -27,11 +27,9 @@ function clamp(n: number, min: number, max: number) {
 }
 
 export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
-    // Default options that should always be available
     const defaultLocations = ["Sri Lanka", "USA"];
     const defaultCategories = ["Sapphire", "Ruby", "Emerald", "Spinel", "Tourmaline", "Other"];
 
-    // Facet options - merge with defaults
     const locations = useMemo(() => {
         const fromData = uniqSorted(stones.map((s) => s.origin));
         const merged = Array.from(new Set([...defaultLocations, ...fromData])).sort((a, b) =>
@@ -48,27 +46,24 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
         return merged;
     }, [stones]);
 
-    // Range bounds
+    // ✅ Fixed carat range: 0 to 10 (step 0.5)
     const caratMinMax = useMemo(() => {
-        return { min: 0, max: 8 }; // Fixed range: 0 to 8 carats
+        return { min: 0, max: 10 };
     }, []);
 
-    // Filter state - initialize with full ranges so all items show by default
     const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-    const [caratRange, setCaratRange] = useState<[number, number]>([0, 8]);
+    const [caratRange, setCaratRange] = useState<[number, number]>([caratMinMax.min, caratMinMax.max]);
 
-    // Collapsible sections
     const [expandedSections, setExpandedSections] = useState({
         location: true,
         carat: true,
         category: true,
     });
 
-    // Update ranges when data changes to ensure all items are shown by default
     useEffect(() => {
-        setCaratRange([0, 8]);
-    }, []);
+        setCaratRange([caratMinMax.min, caratMinMax.max]);
+    }, [caratMinMax.min, caratMinMax.max]);
 
     function toggle(arr: string[], v: string) {
         return arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
@@ -88,24 +83,18 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                 if (!s.category || !selectedCategories.includes(s.category)) return false;
             }
 
-            // Carat filter - stones without carat values show when using default range
+            // Carat filter
             if (typeof s.carat === "number") {
                 if (s.carat < caratRange[0] || s.carat > caratRange[1]) return false;
             } else {
-                // No carat - only exclude if user has actively filtered (not at default)
-                const isCaratFiltered = caratRange[0] !== 0 || caratRange[1] !== 8;
+                const isCaratFiltered =
+                    caratRange[0] !== caratMinMax.min || caratRange[1] !== caratMinMax.max;
                 if (isCaratFiltered) return false;
             }
 
             return true;
         });
-    }, [
-        stones,
-        selectedLocations,
-        selectedCategories,
-        caratRange,
-        caratMinMax.max,
-    ]);
+    }, [stones, selectedLocations, selectedCategories, caratRange, caratMinMax.min, caratMinMax.max]);
 
     const countsByLocation = useMemo(() => {
         const m = new Map<string, number>();
@@ -128,18 +117,17 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
     function resetAll() {
         setSelectedLocations([]);
         setSelectedCategories([]);
-        setCaratRange([0, 8]);
+        setCaratRange([caratMinMax.min, caratMinMax.max]);
     }
 
     const hasActiveFilters =
         selectedLocations.length > 0 ||
         selectedCategories.length > 0 ||
-        caratRange[0] !== 0 ||
-        caratRange[1] !== 8;
+        caratRange[0] !== caratMinMax.min ||
+        caratRange[1] !== caratMinMax.max;
 
     return (
         <div style={wrapStyle} className="stones-filter-wrap">
-            {/* SIDEBAR */}
             <aside style={sidebarStyle} className="filter-sidebar">
                 <div style={sidebarHeaderStyle}>
                     <h3 style={sidebarTitleStyle}>Refine Selection</h3>
@@ -199,11 +187,14 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                                     type="number"
                                     value={caratRange[0]}
                                     onChange={(e) =>
-                                        setCaratRange(([a, b]) => [clamp(Number(e.target.value), 0, b), b])
+                                        setCaratRange(([a, b]) => [
+                                            clamp(Number(e.target.value), caratMinMax.min, b),
+                                            b,
+                                        ])
                                     }
                                     style={rangeInputStyle}
-                                    min={0}
-                                    max={8}
+                                    min={caratMinMax.min}
+                                    max={caratMinMax.max}
                                     step={0.5}
                                 />
                                 <span style={rangeSeparatorStyle}>−</span>
@@ -211,31 +202,39 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                                     type="number"
                                     value={caratRange[1]}
                                     onChange={(e) =>
-                                        setCaratRange(([a, b]) => [a, clamp(Number(e.target.value), a, 8)])
+                                        setCaratRange(([a, b]) => [
+                                            a,
+                                            clamp(Number(e.target.value), a, caratMinMax.max),
+                                        ])
                                     }
                                     style={rangeInputStyle}
-                                    min={0}
-                                    max={8}
+                                    min={caratMinMax.min}
+                                    max={caratMinMax.max}
                                     step={0.5}
                                 />
                             </div>
 
                             <div style={sliderContainerStyle}>
-                                {/* Slider tick marks */}
+                                {/* Slider tick marks: 0..10 by 0.5 */}
                                 <div style={sliderTicksStyle}>
-                                    {Array.from({ length: 17 }, (_, i) => i * 0.5).map((value) => (
+                                    {Array.from(
+                                        { length: (caratMinMax.max - caratMinMax.min) / 0.5 + 1 },
+                                        (_, i) => caratMinMax.min + i * 0.5
+                                    ).map((value) => (
                                         <div key={value} style={sliderTickStyle}>
                                             <div style={sliderTickMarkStyle} />
-                                            {value % 1 === 0 && <div style={sliderTickLabelStyle}>{value}</div>}
+                                            {value % 1 === 0 && (
+                                                <div style={sliderTickLabelStyle}>{value}</div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
 
-                                {/* Single slider for minimum value */}
+                                {/* Slider for minimum value (0..10 by 0.5) */}
                                 <input
                                     type="range"
-                                    min={0}
-                                    max={8}
+                                    min={caratMinMax.min}
+                                    max={caratMinMax.max}
                                     step={0.5}
                                     value={caratRange[0]}
                                     onChange={(e) =>
@@ -281,7 +280,6 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                 )}
             </aside>
 
-            {/* RESULTS */}
             <section style={resultsStyle} className="filter-results">
                 <div style={resultsHeaderStyle}>
                     <div>
@@ -295,7 +293,11 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                             const cover = s.images?.[0];
                             return (
                                 <Reveal key={s._id} delayMs={index * 60}>
-                                    <Link href={`/stones/id/${encodeURIComponent(s._id)}`} style={cardStyle} className="stone-card">
+                                    <Link
+                                        href={`/stones/id/${encodeURIComponent(s._id)}`}
+                                        style={cardStyle}
+                                        className="stone-card"
+                                    >
                                         <div style={imageFrameStyle} className="stone-image-frame">
                                             {cover ? (
                                                 <Image
@@ -343,6 +345,7 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
 }
 
 /* ------------------ STYLES ------------------ */
+/* Your styles remain unchanged below this point */
 
 const wrapStyle: React.CSSProperties = {
     display: "grid",
@@ -350,8 +353,6 @@ const wrapStyle: React.CSSProperties = {
     gap: 80,
     alignItems: "start",
 };
-
-// Media queries will override via className
 
 const sidebarStyle: React.CSSProperties = {
     position: "sticky",
@@ -484,7 +485,7 @@ const rangeSeparatorStyle: React.CSSProperties = {
 
 const sliderContainerStyle: React.CSSProperties = {
     position: "relative",
-    paddingTop: 32, // Increased from 8 to move slider down more
+    paddingTop: 32,
     paddingBottom: 8,
 };
 
