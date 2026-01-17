@@ -28,19 +28,10 @@ function clamp(n: number, min: number, max: number) {
 
 export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
     const defaultLocations = ["Sri Lanka", "USA"];
-    const defaultCategories = ["Sapphire", "Ruby", "Emerald", "Spinel", "Tourmaline", "Other"];
 
     const locations = useMemo(() => {
         const fromData = uniqSorted(stones.map((s) => s.origin));
         const merged = Array.from(new Set([...defaultLocations, ...fromData])).sort((a, b) =>
-            a.localeCompare(b)
-        );
-        return merged;
-    }, [stones]);
-
-    const categories = useMemo(() => {
-        const fromData = uniqSorted(stones.map((s) => s.category));
-        const merged = Array.from(new Set([...defaultCategories, ...fromData])).sort((a, b) =>
             a.localeCompare(b)
         );
         return merged;
@@ -52,13 +43,11 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
     }, []);
 
     const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
-    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [caratRange, setCaratRange] = useState<[number, number]>([caratMinMax.min, caratMinMax.max]);
 
     const [expandedSections, setExpandedSections] = useState({
         location: true,
         carat: true,
-        category: true,
     });
 
     useEffect(() => {
@@ -79,10 +68,6 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                 if (!s.origin || !selectedLocations.includes(s.origin)) return false;
             }
 
-            if (selectedCategories.length > 0) {
-                if (!s.category || !selectedCategories.includes(s.category)) return false;
-            }
-
             // Carat filter
             if (typeof s.carat === "number") {
                 if (s.carat < caratRange[0] || s.carat > caratRange[1]) return false;
@@ -94,7 +79,7 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
 
             return true;
         });
-    }, [stones, selectedLocations, selectedCategories, caratRange, caratMinMax.min, caratMinMax.max]);
+    }, [stones, selectedLocations, caratRange, caratMinMax.min, caratMinMax.max]);
 
     const countsByLocation = useMemo(() => {
         const m = new Map<string, number>();
@@ -105,24 +90,13 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
         return m;
     }, [stones]);
 
-    const countsByCategory = useMemo(() => {
-        const m = new Map<string, number>();
-        stones.forEach((s) => {
-            if (!s.category) return;
-            m.set(s.category, (m.get(s.category) || 0) + 1);
-        });
-        return m;
-    }, [stones]);
-
     function resetAll() {
         setSelectedLocations([]);
-        setSelectedCategories([]);
         setCaratRange([caratMinMax.min, caratMinMax.max]);
     }
 
     const hasActiveFilters =
         selectedLocations.length > 0 ||
-        selectedCategories.length > 0 ||
         caratRange[0] !== caratMinMax.min ||
         caratRange[1] !== caratMinMax.max;
 
@@ -169,7 +143,7 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                     </div>
                 )}
 
-                {/* Carat Weight */}
+                {/* Carat Weight (UNCHANGED) */}
                 <div style={filterSectionStyle}>
                     <button
                         onClick={() => toggleSection("carat")}
@@ -247,37 +221,6 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                         </div>
                     )}
                 </div>
-
-                {/* Category */}
-                {categories.length > 0 && (
-                    <div style={filterSectionStyle}>
-                        <button
-                            onClick={() => toggleSection("category")}
-                            style={sectionHeaderStyle}
-                            type="button"
-                        >
-                            <span style={sectionTitleStyle}>Category</span>
-                            <span style={chevronStyle}>{expandedSections.category ? "−" : "+"}</span>
-                        </button>
-
-                        {expandedSections.category && (
-                            <div style={sectionContentStyle}>
-                                {categories.map((cat) => (
-                                    <label key={cat} style={checkboxLabelStyle}>
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedCategories.includes(cat)}
-                                            onChange={() => setSelectedCategories((a) => toggle(a, cat))}
-                                            style={checkboxInputStyle}
-                                        />
-                                        <span style={checkboxTextStyle}>{cat}</span>
-                                        <span style={countStyle}>({countsByCategory.get(cat) || 0})</span>
-                                    </label>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
             </aside>
 
             <section style={resultsStyle} className="filter-results">
@@ -345,7 +288,6 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
 }
 
 /* ------------------ STYLES ------------------ */
-/* Your styles remain unchanged below this point */
 
 const wrapStyle: React.CSSProperties = {
     display: "grid",

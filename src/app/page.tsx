@@ -1,4 +1,6 @@
 export const revalidate = 0;
+
+import Link from "next/link";
 import { client } from "@/sanity/lib/client";
 import Reveal from "@/app/components/Reveal";
 import StoneFilters from "@/app/components/StoneFilters";
@@ -37,7 +39,6 @@ export default async function Page() {
 
             {/* COMPACT HERO - No text over image */}
             <section style={heroSectionStyle}>
-                {/* Gemstone Image Banner - Horizontal, no text overlay */}
                 <div style={imageContainerStyle} className="hero-banner-container">
                     <img
                         src="/background.jpg"
@@ -45,24 +46,20 @@ export default async function Page() {
                         style={bannerImageStyle}
                         className="hero-banner-image"
                     />
-                    {/* Subtle gradient overlay at bottom for blend */}
                     <div style={imageOverlayStyle} />
                 </div>
 
-                {/* Minimal Text Section Below Image */}
                 <div style={heroTextSectionStyle} className="hero-text-section">
                     <div style={heroContentStyle}>
                         <Reveal delayMs={0}>
-                            <h1 style={brandHeadingStyle} className="hero-h1">Ceylon Gem Co.</h1>
+                            <h1 style={brandHeadingStyle} className="hero-h1">
+                                Ceylon Gem Co.
+                            </h1>
                         </Reveal>
 
                         <Reveal delayMs={100}>
                             <div
-                                style={{
-                                    ...brandStyle,
-                                    marginTop: 14,
-                                    marginBottom: 0
-                                }}
+                                style={{ ...brandStyle, marginTop: 14, marginBottom: 0 }}
                                 className="hero-brand-text"
                             >
                                 Fine gemstones sourced in Ceylon and distributed across global markets
@@ -72,9 +69,33 @@ export default async function Page() {
                 </div>
             </section>
 
-            {/* COLLECTION SECTION - Immediately visible */}
+            {/* COLLECTION SECTION */}
             <section id="collection" style={collectionSectionStyle}>
                 <div style={collectionContainerStyle}>
+                    {/* ✅ Category shortcuts */}
+                    <div style={categoryNavWrapStyle}>
+                        <Reveal delayMs={0}>
+                            <div style={categoryNavTitleStyle}>Browse by stone</div>
+                        </Reveal>
+
+                        <Reveal delayMs={100}>
+                            <div style={categoryNavStyle} className="category-nav">
+                                <Link href="/stones/category/sapphire" style={categoryPillStyle} className="category-pill">
+                                    Sapphires
+                                </Link>
+                                <Link href="/stones/category/padparadscha" style={categoryPillStyle} className="category-pill">
+                                    Padparadscha
+                                </Link>
+                                <Link href="/stones/category/spinel" style={categoryPillStyle} className="category-pill">
+                                    Spinel
+                                </Link>
+                                <Link href="/stones/category/other" style={categoryPillStyle} className="category-pill">
+                                    Other
+                                </Link>
+                            </div>
+                        </Reveal>
+                    </div>
+
                     <StoneFilters stones={stones} />
                 </div>
             </section>
@@ -97,31 +118,21 @@ export default async function Page() {
 
                     <Reveal delayMs={300}>
                         <div style={partnersGridStyle} className="partners-grid">
-                            {/* Partner 1 - AIGS */}
                             <div style={partnerCardStyle} className="partner-card">
                                 <div style={partnerLogoStyle} className="partner-logo">
-                                    <a
-                                        href="https://www.gia.edu/"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                    <img
-                                        src="/GIA.jpg"
-                                        alt="AIGS - Asian Institute of Gemological Sciences"
-                                        style={logoImageStyle}
-                                    />
+                                    <a href="https://www.gia.edu/" target="_blank" rel="noopener noreferrer">
+                                        <img
+                                            src="/GIA.jpg"
+                                            alt="GIA - Gemological Institute of America"
+                                            style={logoImageStyle}
+                                        />
                                     </a>
                                 </div>
                             </div>
 
-                            {/* Partner 2 - AGCL */}
                             <div style={partnerCardStyle} className="partner-card">
                                 <div style={partnerLogoStyle} className="partner-logo">
-                                    <a
-                                        href="https://www.agclgemlab.com/"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
+                                    <a href="https://www.agclgemlab.com/" target="_blank" rel="noopener noreferrer">
                                         <img
                                             src="/AGCL.png"
                                             alt="AGCL - Asian Gemological Centre & Laboratory"
@@ -131,7 +142,6 @@ export default async function Page() {
                                 </div>
                             </div>
 
-                            {/* Partner 3 - RGTL */}
                             <div style={partnerCardStyle} className="partner-card">
                                 <div style={partnerLogoStyle} className="partner-logo">
                                     <a
@@ -141,21 +151,16 @@ export default async function Page() {
                                     >
                                         <img
                                             src="/RGTL.png"
-                                            alt="RGTL - Ratnapura Gem Testing Laboratory"
+                                            alt="RGTL - Rockland Gem Testing Laboratory"
                                             style={logoImageStyle}
                                         />
                                     </a>
                                 </div>
                             </div>
 
-                            {/* Partner 4 - Bellerophon */}
                             <div style={partnerCardStyle} className="partner-card">
                                 <div style={partnerLogoStyle} className="partner-logo">
-                                    <a
-                                        href="https://www.gemlabanalysis.com/"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
+                                    <a href="https://www.gemlabanalysis.com/" target="_blank" rel="noopener noreferrer">
                                         <img
                                             src="/bellerophon.png"
                                             alt="Bellerophon Gemological Laboratory"
@@ -220,6 +225,8 @@ export default async function Page() {
                     © {new Date().getFullYear()} CEYLON GEM COMPANY — Private sourcing by appointment
                 </div>
             </section>
+
+
         </div>
     );
 }
@@ -285,6 +292,7 @@ const brandStyle: React.CSSProperties = {
     fontWeight: 400,
     color: "rgba(26, 26, 26, 0.5)",
     marginBottom: 20,
+    lineHeight: 1.6,
 };
 
 const brandHeadingStyle: React.CSSProperties = {
@@ -293,15 +301,7 @@ const brandHeadingStyle: React.CSSProperties = {
     letterSpacing: "0.2em",
     marginBottom: 0,
     color: "#1a1a1a",
-};
-
-const h1Style: React.CSSProperties = {
-    fontSize: "clamp(32px, 4vw, 48px)",
-    lineHeight: 1.2,
-    fontWeight: 400,
-    letterSpacing: "-0.01em",
-    color: "#1a1a1a",
-    margin: 0,
+    lineHeight: 1.12,
 };
 
 const collectionSectionStyle: React.CSSProperties = {
@@ -316,7 +316,42 @@ const collectionContainerStyle: React.CSSProperties = {
     margin: "0 auto",
 };
 
-// PARTNERS SECTION
+/* ✅ Category nav styles */
+const categoryNavWrapStyle: React.CSSProperties = {
+    marginBottom: 36,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 14,
+};
+
+const categoryNavTitleStyle: React.CSSProperties = {
+    fontSize: 10,
+    letterSpacing: "0.32em",
+    textTransform: "uppercase",
+    color: "rgba(26, 26, 26, 0.45)",
+};
+
+const categoryNavStyle: React.CSSProperties = {
+    display: "flex",
+    gap: 12,
+    flexWrap: "wrap",
+    justifyContent: "center",
+};
+
+const categoryPillStyle: React.CSSProperties = {
+    textDecoration: "none",
+    color: "#1a1a1a",
+    border: "1px solid rgba(26, 26, 26, 0.14)",
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
+    padding: "10px 14px",
+    fontSize: 12,
+    letterSpacing: "0.12em",
+    textTransform: "uppercase",
+    transition: "opacity 0.25s ease",
+};
+
+/* PARTNERS SECTION */
 const partnersSectionStyle: React.CSSProperties = {
     backgroundColor: "#ffffff",
     color: "#1a1a1a",

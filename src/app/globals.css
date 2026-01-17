@@ -723,3 +723,47 @@ body {
     justify-content: center !important;
   }
 }
+
+/* --- Mobile fixes for hero + category pills --- */
+@media (max-width: 640px) {
+  .hero-banner-container {
+    height: 38vh !important;
+    min-height: 260px !important;
+    max-height: 420px !important;
+    margin-top: 64px !important;
+  }
+
+  .hero-text-section {
+    padding: 40px 6vw !important;
+  }
+
+  .hero-h1 {
+    line-height: 1.12 !important;
+    letter-spacing: 0.12em !important;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+    margin: 0 !important;
+  }
+
+  .hero-brand-text {
+    line-height: 1.65 !important;
+    letter-spacing: 0.22em !important;
+    margin-top: 12px !important;
+    text-wrap: balance;
+  }
+
+  .category-nav {
+    gap: 10px !important;
+  }
+
+  .category-pill {
+    padding: 9px 12px !important;
+    font-size: 11px !important;
+    letter-spacing: 0.1em !important;
+    line-height: 1.2 !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+  }
+}

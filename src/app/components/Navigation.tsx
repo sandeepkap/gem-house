@@ -2,10 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function Navigation() {
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    const pathname = usePathname();
+    const router = useRouter();
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -15,18 +19,32 @@ export default function Navigation() {
 
     const closeMobileMenu = () => setMobileMenuOpen(false);
 
-    const scrollToId = (id: string) => (e: React.MouseEvent) => {
+    const goToSection = (id: string) => async (e: React.MouseEvent) => {
         e.preventDefault();
         closeMobileMenu();
-        const el = document.getElementById(id);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+
+        // If we're already on home, smooth scroll.
+        if (pathname === "/") {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+            return;
+        }
+
+        // If we're on another route, navigate to home with hash.
+        // Browser will jump to the section automatically.
+        router.push(`/#${id}`);
     };
 
-    const scrollToTop = (e: React.MouseEvent) => {
-        // Ensures it always feels correct even if you're already on "/"
+    const goHomeTop = (e: React.MouseEvent) => {
         e.preventDefault();
         closeMobileMenu();
-        window.scrollTo({ top: 0, behavior: "smooth" });
+
+        if (pathname === "/") {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            return;
+        }
+
+        router.push("/");
     };
 
     return (
@@ -35,7 +53,9 @@ export default function Navigation() {
                 style={{
                     ...navStyle,
                     backgroundColor: scrolled ? "rgba(10,10,10,0.98)" : "rgba(10,10,10,0.92)",
-                    borderBottom: scrolled ? "1px solid rgba(250,250,250,0.08)" : "1px solid rgba(250,250,250,0.00)",
+                    borderBottom: scrolled
+                        ? "1px solid rgba(250,250,250,0.08)"
+                        : "1px solid rgba(250,250,250,0.00)",
                     backdropFilter: "blur(10px)",
                 }}
             >
@@ -45,10 +65,10 @@ export default function Navigation() {
 
                     {/* Center links (desktop) */}
                     <div style={navLinksStyle} className="nav-links-desktop">
-                        <a href="#collection" onClick={scrollToId("collection")} style={navLinkStyle}>
+                        <a href="/#collection" onClick={goToSection("collection")} style={navLinkStyle}>
                             Collection
                         </a>
-                        <a href="#contact" onClick={scrollToId("contact")} style={navLinkStyle}>
+                        <a href="/#contact" onClick={goToSection("contact")} style={navLinkStyle}>
                             Contact
                         </a>
                     </div>
@@ -57,7 +77,7 @@ export default function Navigation() {
                     <div style={rightSlotStyle}>
                         <Link
                             href="/"
-                            onClick={scrollToTop}
+                            onClick={goHomeTop}
                             style={companyNameLinkStyle}
                             className="company-name-link"
                         >
@@ -105,10 +125,10 @@ export default function Navigation() {
             {mobileMenuOpen && (
                 <div style={mobileMenuOverlayStyle} onClick={closeMobileMenu}>
                     <div style={mobileMenuContentStyle} onClick={(e) => e.stopPropagation()}>
-                        <a href="#collection" onClick={scrollToId("collection")} style={mobileMenuLinkStyle}>
+                        <a href="/#collection" onClick={goToSection("collection")} style={mobileMenuLinkStyle}>
                             Collection
                         </a>
-                        <a href="#contact" onClick={scrollToId("contact")} style={mobileMenuLinkStyle}>
+                        <a href="/#contact" onClick={goToSection("contact")} style={mobileMenuLinkStyle}>
                             Contact
                         </a>
                     </div>
@@ -137,8 +157,6 @@ const navContainerStyle: React.CSSProperties = {
     display: "grid",
     gridTemplateColumns: "1fr auto 1fr",
     alignItems: "center",
-    // IMPORTANT: remove gap or the center won't feel mathematically centered
-    // because the right column grows + adds spacing.
     gap: 0,
 };
 
@@ -187,7 +205,7 @@ const companyNameStyle: React.CSSProperties = {
 };
 
 const mobileMenuButtonStyle: React.CSSProperties = {
-    display: "none", // enabled via media query above
+    display: "none",
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "column",
