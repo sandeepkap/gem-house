@@ -586,7 +586,7 @@ const emptyTextStyle: React.CSSProperties = {
 };
 
 const stonePriceRequestStyle: React.CSSProperties = {
-    fontSize: 10,
+    fontSize: 8,
     letterSpacing: "0.14em",
     textTransform: "uppercase",
     color: "rgba(10, 10, 10, 0.45)",
