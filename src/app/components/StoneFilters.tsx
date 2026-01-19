@@ -260,8 +260,17 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                                             <div style={cardHeaderStyle}>
                                                 <div style={stoneNameStyle}>{s.name}</div>
                                                 {s.category && (
-                                                    <div style={stoneCategoryStyle}>{s.category}</div>
+                                                    <div
+                                                        style={
+                                                            s.category === "Price on request"
+                                                                ? stonePriceRequestStyle
+                                                                : stoneCategoryStyle
+                                                        }
+                                                    >
+                                                        {s.category}
+                                                    </div>
                                                 )}
+
                                             </div>
                                             <div style={stoneMetaStyle}>
                                                 {s.origin || "Origin undisclosed"}
@@ -487,12 +496,6 @@ const resultsKickerStyle: React.CSSProperties = {
     marginBottom: 8,
 };
 
-const resultsCountStyle: React.CSSProperties = {
-    fontSize: 28,
-    fontWeight: 400,
-    letterSpacing: "-0.01em",
-    color: "#0a0a0a",
-};
 
 const gridStyle: React.CSSProperties = {
     display: "grid",
@@ -557,7 +560,7 @@ const stoneNameStyle: React.CSSProperties = {
 };
 
 const stoneCategoryStyle: React.CSSProperties = {
-    fontSize: 10,
+    fontSize: 14,
     letterSpacing: "0.22em",
     textTransform: "uppercase",
     color: "rgba(10, 10, 10, 0.56)",
@@ -580,4 +583,12 @@ const emptyTextStyle: React.CSSProperties = {
     color: "rgba(10, 10, 10, 0.48)",
     fontWeight: 300,
     lineHeight: 1.7,
+};
+
+const stonePriceRequestStyle: React.CSSProperties = {
+    fontSize: 10,
+    letterSpacing: "0.14em",
+    textTransform: "uppercase",
+    color: "rgba(10, 10, 10, 0.45)",
+    whiteSpace: "nowrap",
 };

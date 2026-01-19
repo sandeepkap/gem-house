@@ -9,7 +9,7 @@ import Navigation from "@/app/components/Navigation";
 type StoneListItem = {
     _id: string;
     name: string;
-    category: string;
+    category: string; // StoneFilters uses this for the "subtitle" line
     origin?: string;
     carat?: number;
     price?: number | null;
@@ -30,8 +30,23 @@ async function getStones(): Promise<StoneListItem[]> {
   `);
 }
 
+function formatPrice(price?: number | null) {
+    if (price === null || price === undefined) return "Price on request";
+    return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0,
+    }).format(price);
+}
+
 export default async function Page() {
     const stones = await getStones();
+
+    // ✅ Make homepage show PRICE where StoneFilters currently shows CATEGORY
+    const stonesForHome: StoneListItem[] = stones.map((s) => ({
+        ...s,
+        category: formatPrice(s.price), // overwrite category with formatted price string
+    }));
 
     return (
         <div style={pageStyle}>
@@ -80,23 +95,40 @@ export default async function Page() {
 
                         <Reveal delayMs={100}>
                             <div style={categoryNavStyle} className="category-nav">
-                                <Link href="/stones/category/sapphire" style={categoryPillStyle} className="category-pill">
+                                <Link
+                                    href="/stones/category/sapphire"
+                                    style={categoryPillStyle}
+                                    className="category-pill"
+                                >
                                     Sapphires
                                 </Link>
-                                <Link href="/stones/category/padparadscha" style={categoryPillStyle} className="category-pill">
+                                <Link
+                                    href="/stones/category/padparadscha"
+                                    style={categoryPillStyle}
+                                    className="category-pill"
+                                >
                                     Padparadscha
                                 </Link>
-                                <Link href="/stones/category/spinel" style={categoryPillStyle} className="category-pill">
+                                <Link
+                                    href="/stones/category/spinel"
+                                    style={categoryPillStyle}
+                                    className="category-pill"
+                                >
                                     Spinel
                                 </Link>
-                                <Link href="/stones/category/other" style={categoryPillStyle} className="category-pill">
+                                <Link
+                                    href="/stones/category/other"
+                                    style={categoryPillStyle}
+                                    className="category-pill"
+                                >
                                     Other
                                 </Link>
                             </div>
                         </Reveal>
                     </div>
 
-                    <StoneFilters stones={stones} />
+                    {/* ✅ pass transformed stones so homepage displays price */}
+                    <StoneFilters stones={stonesForHome} />
                 </div>
             </section>
 
@@ -111,7 +143,7 @@ export default async function Page() {
                     </Reveal>
                     <Reveal delayMs={200}>
                         <p style={partnersDescriptionStyle}>
-                            We collaborate with Sri Lanka's most respected gemological laboratories
+                            We collaborate with Sri Lanka&apos;s most respected gemological laboratories
                             and certification authorities to ensure authenticity and quality.
                         </p>
                     </Reveal>
@@ -225,8 +257,6 @@ export default async function Page() {
                     © {new Date().getFullYear()} CEYLON GEM COMPANY — Private sourcing by appointment
                 </div>
             </section>
-
-
         </div>
     );
 }
