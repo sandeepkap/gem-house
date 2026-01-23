@@ -23,15 +23,12 @@ export default function Navigation() {
         e.preventDefault();
         closeMobileMenu();
 
-        // If we're already on home, smooth scroll.
         if (pathname === "/") {
             const el = document.getElementById(id);
             if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
             return;
         }
 
-        // If we're on another route, navigate to home with hash.
-        // Browser will jump to the section automatically.
         router.push(`/#${id}`);
     };
 
@@ -52,7 +49,9 @@ export default function Navigation() {
             <nav
                 style={{
                     ...navStyle,
-                    backgroundColor: scrolled ? "rgba(10,10,10,0.98)" : "rgba(10,10,10,0.92)",
+                    backgroundColor: scrolled
+                        ? "rgba(10,10,10,0.98)"
+                        : "rgba(10,10,10,0.92)",
                     borderBottom: scrolled
                         ? "1px solid rgba(250,250,250,0.08)"
                         : "1px solid rgba(250,250,250,0.00)",
@@ -60,10 +59,16 @@ export default function Navigation() {
                 }}
             >
                 <div style={navContainerStyle}>
-                    {/* Left spacer (keeps center column mathematically centered) */}
-                    <div style={leftSpacerStyle} aria-hidden />
+                    {/* LEFT: Logo */}
+                    <Link href="/" onClick={goHomeTop} style={logoLinkStyle}>
+                        <img
+                            src="/logo.png"
+                            alt="Ceylon Gem Co."
+                            style={navLogoStyle}
+                        />
+                    </Link>
 
-                    {/* Center links (desktop) */}
+                    {/* CENTER: Desktop links */}
                     <div style={navLinksStyle} className="nav-links-desktop">
                         <a href="/#collection" onClick={goToSection("collection")} style={navLinkStyle}>
                             Collection
@@ -73,7 +78,7 @@ export default function Navigation() {
                         </a>
                     </div>
 
-                    {/* Right side */}
+                    {/* RIGHT: Brand text + mobile toggle */}
                     <div style={rightSlotStyle}>
                         <Link
                             href="/"
@@ -81,12 +86,11 @@ export default function Navigation() {
                             style={companyNameLinkStyle}
                             className="company-name-link"
                         >
-              <span style={companyNameStyle} className="company-name">
-                CEYLON GEM CO.
-              </span>
+                            <span style={companyNameStyle} className="company-name">
+                                CEYLON GEM CO.
+                            </span>
                         </Link>
 
-                        {/* Mobile menu button (only visible on small screens via CSS below) */}
                         <button
                             onClick={() => setMobileMenuOpen((v) => !v)}
                             style={mobileMenuButtonStyle}
@@ -94,41 +98,61 @@ export default function Navigation() {
                             aria-label="Toggle menu"
                             type="button"
                         >
-              <span
-                  style={{
-                      ...hamburgerLineStyle,
-                      transform: mobileMenuOpen ? "rotate(45deg) translateY(8px)" : "none",
-                  }}
-              />
-                            <span style={{ ...hamburgerLineStyle, opacity: mobileMenuOpen ? 0 : 1 }} />
                             <span
                                 style={{
                                     ...hamburgerLineStyle,
-                                    transform: mobileMenuOpen ? "rotate(-45deg) translateY(-8px)" : "none",
+                                    transform: mobileMenuOpen
+                                        ? "rotate(45deg) translateY(8px)"
+                                        : "none",
+                                }}
+                            />
+                            <span
+                                style={{
+                                    ...hamburgerLineStyle,
+                                    opacity: mobileMenuOpen ? 0 : 1,
+                                }}
+                            />
+                            <span
+                                style={{
+                                    ...hamburgerLineStyle,
+                                    transform: mobileMenuOpen
+                                        ? "rotate(-45deg) translateY(-8px)"
+                                        : "none",
                                 }}
                             />
                         </button>
                     </div>
                 </div>
 
-                {/* Minimal CSS for responsive behavior */}
                 <style>{`
-          @media (max-width: 860px) {
-            .nav-links-desktop { display: none !important; }
-            .mobile-menu-button { display: inline-flex !important; }
-            .company-name { letter-spacing: 0.22em !important; }
-          }
-        `}</style>
+                    @media (max-width: 860px) {
+                        .nav-links-desktop { display: none !important; }
+                        .mobile-menu-button { display: inline-flex !important; }
+                        .company-name { letter-spacing: 0.22em !important; }
+                        img[alt="Ceylon Gem Co."] { height: 28px; }
+                    }
+                `}</style>
             </nav>
 
-            {/* Mobile menu */}
+            {/* MOBILE MENU */}
             {mobileMenuOpen && (
                 <div style={mobileMenuOverlayStyle} onClick={closeMobileMenu}>
-                    <div style={mobileMenuContentStyle} onClick={(e) => e.stopPropagation()}>
-                        <a href="/#collection" onClick={goToSection("collection")} style={mobileMenuLinkStyle}>
+                    <div
+                        style={mobileMenuContentStyle}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <a
+                            href="/#collection"
+                            onClick={goToSection("collection")}
+                            style={mobileMenuLinkStyle}
+                        >
                             Collection
                         </a>
-                        <a href="/#contact" onClick={goToSection("contact")} style={mobileMenuLinkStyle}>
+                        <a
+                            href="/#contact"
+                            onClick={goToSection("contact")}
+                            style={mobileMenuLinkStyle}
+                        >
                             Contact
                         </a>
                     </div>
@@ -157,11 +181,21 @@ const navContainerStyle: React.CSSProperties = {
     display: "grid",
     gridTemplateColumns: "1fr auto 1fr",
     alignItems: "center",
-    gap: 0,
 };
 
-const leftSpacerStyle: React.CSSProperties = {
-    minHeight: 1,
+const logoLinkStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+};
+
+const navLogoStyle: React.CSSProperties = {
+    height: 52,                 // visually larger
+    width: "auto",
+    objectFit: "contain",
+    opacity: 0.95,
+    filter: "drop-shadow(0 6px 18px rgba(0,0,0,0.35))",
+    marginTop: -8,              // ⬅️ pull up
+    marginBottom: -8,           // ⬅️ pull down
 };
 
 const navLinksStyle: React.CSSProperties = {
@@ -174,10 +208,8 @@ const navLinksStyle: React.CSSProperties = {
 const navLinkStyle: React.CSSProperties = {
     fontSize: 14,
     letterSpacing: "0.02em",
-    color: "rgba(250, 250, 250, 0.75)",
+    color: "rgba(250,250,250,0.75)",
     textDecoration: "none",
-    transition: "color 0.3s ease",
-    cursor: "pointer",
     fontWeight: 300,
 };
 
@@ -190,24 +222,18 @@ const rightSlotStyle: React.CSSProperties = {
 
 const companyNameLinkStyle: React.CSSProperties = {
     textDecoration: "none",
-    cursor: "pointer",
-    transition: "opacity 0.3s ease",
 };
 
 const companyNameStyle: React.CSSProperties = {
     fontSize: 11,
     letterSpacing: "0.28em",
     textTransform: "uppercase",
-    fontWeight: 400,
-    color: "rgba(250, 250, 250, 0.85)",
-    transition: "color 0.3s ease",
+    color: "rgba(250,250,250,0.85)",
     whiteSpace: "nowrap",
 };
 
 const mobileMenuButtonStyle: React.CSSProperties = {
     display: "none",
-    alignItems: "center",
-    justifyContent: "center",
     flexDirection: "column",
     gap: 6,
     background: "none",
@@ -225,11 +251,8 @@ const hamburgerLineStyle: React.CSSProperties = {
 
 const mobileMenuOverlayStyle: React.CSSProperties = {
     position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(10, 10, 10, 0.97)",
+    inset: 0,
+    backgroundColor: "rgba(10,10,10,0.97)",
     backdropFilter: "blur(10px)",
     zIndex: 999,
     display: "flex",
@@ -242,14 +265,11 @@ const mobileMenuContentStyle: React.CSSProperties = {
     flexDirection: "column",
     gap: 40,
     alignItems: "center",
-    padding: 40,
 };
 
 const mobileMenuLinkStyle: React.CSSProperties = {
     fontSize: 28,
-    letterSpacing: "-0.01em",
     color: "#fafafa",
     textDecoration: "none",
     fontWeight: 300,
-    transition: "opacity 0.3s ease",
 };

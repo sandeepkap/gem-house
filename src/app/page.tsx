@@ -6,29 +6,33 @@ import Reveal from "@/app/components/Reveal";
 import StoneFilters from "@/app/components/StoneFilters";
 import Navigation from "@/app/components/Navigation";
 
+/* ------------------ TYPES ------------------ */
+
 type StoneListItem = {
     _id: string;
     name: string;
-    category: string; // StoneFilters uses this for the "subtitle" line
+    category: string;
     origin?: string;
     carat?: number;
     price?: number | null;
     images?: any[];
 };
 
-// ✅ UPDATED: Now sorts by sortOrder first, then creation date
+/* ------------------ DATA ------------------ */
+
 async function getStones(): Promise<StoneListItem[]> {
     return client.fetch(`
-    *[_type == "stone" && available == true] | order(sortOrder asc, _createdAt desc) {
-      _id,
-      name,
-      category,
-      origin,
-      carat,
-      price,
-      images
-    }
-  `);
+        *[_type == "stone" && available == true]
+        | order(sortOrder asc, _createdAt desc) {
+            _id,
+            name,
+            category,
+            origin,
+            carat,
+            price,
+            images
+        }
+    `);
 }
 
 function formatPrice(price?: number | null) {
@@ -40,47 +44,49 @@ function formatPrice(price?: number | null) {
     }).format(price);
 }
 
+/* ------------------ PAGE ------------------ */
+
 export default async function Page() {
     const stones = await getStones();
 
-    // ✅ Make homepage show PRICE where StoneFilters currently shows CATEGORY
+    // show PRICE where StoneFilters currently shows CATEGORY
     const stonesForHome: StoneListItem[] = stones.map((s) => ({
         ...s,
-        category: formatPrice(s.price), // overwrite category with formatted price string
+        category: formatPrice(s.price),
     }));
 
     return (
         <div style={pageStyle}>
             <Navigation />
 
-            {/* COMPACT HERO - No text over image */}
+            {/* HERO: image only (no logo overlays) */}
             <section style={heroSectionStyle}>
-                <div style={imageContainerStyle} className="hero-banner-container">
-                    <img
-                        src="/background.jpg"
-                        alt="Fine Gemstones"
-                        style={bannerImageStyle}
-                        className="hero-banner-image"
-                    />
-                    <div style={imageOverlayStyle} />
+                <div style={imageContainerStyle}>
+                    <img src="/background.jpg" alt="Fine Gemstones" style={bannerImageStyle} />
+                    {/* subtle bottom blend into masthead */}
+                    <div style={imageFadeStyle} />
                 </div>
 
-                <div style={heroTextSectionStyle} className="hero-text-section">
-                    <div style={heroContentStyle}>
+                {/* MASTHEAD BAR */}
+                <div style={mastheadWrapStyle}>
+                    <div style={mastheadInnerStyle}>
+                        <div style={mastheadRuleStyle} />
+
                         <Reveal delayMs={0}>
-                            <h1 style={brandHeadingStyle} className="hero-h1">
-                                Ceylon Gem Co.
-                            </h1>
+                            <div style={mastheadTopKickerStyle}>CEYLON · SRI LANKA</div>
                         </Reveal>
 
-                        <Reveal delayMs={100}>
-                            <div
-                                style={{ ...brandStyle, marginTop: 14, marginBottom: 0 }}
-                                className="hero-brand-text"
-                            >
+                        <Reveal delayMs={80}>
+                            <h1 style={mastheadTitleStyle}>CEYLON GEM CO.</h1>
+                        </Reveal>
+
+                        <Reveal delayMs={140}>
+                            <div style={mastheadSubStyle}>
                                 Fine gemstones sourced in Ceylon and distributed across global markets
                             </div>
                         </Reveal>
+
+                        <div style={mastheadRuleStyle} />
                     </div>
                 </div>
             </section>
@@ -88,47 +94,29 @@ export default async function Page() {
             {/* COLLECTION SECTION */}
             <section id="collection" style={collectionSectionStyle}>
                 <div style={collectionContainerStyle}>
-                    {/* ✅ Category shortcuts */}
                     <div style={categoryNavWrapStyle}>
                         <Reveal delayMs={0}>
                             <div style={categoryNavTitleStyle}>Browse by stone</div>
                         </Reveal>
 
                         <Reveal delayMs={100}>
-                            <div style={categoryNavStyle} className="category-nav">
-                                <Link
-                                    href="/stones/category/sapphire"
-                                    style={categoryPillStyle}
-                                    className="category-pill"
-                                >
+                            <div style={categoryNavStyle}>
+                                <Link href="/stones/category/sapphire" style={categoryPillStyle}>
                                     Sapphires
                                 </Link>
-                                <Link
-                                    href="/stones/category/padparadscha"
-                                    style={categoryPillStyle}
-                                    className="category-pill"
-                                >
+                                <Link href="/stones/category/padparadscha" style={categoryPillStyle}>
                                     Padparadscha
                                 </Link>
-                                <Link
-                                    href="/stones/category/spinel"
-                                    style={categoryPillStyle}
-                                    className="category-pill"
-                                >
+                                <Link href="/stones/category/spinel" style={categoryPillStyle}>
                                     Spinel
                                 </Link>
-                                <Link
-                                    href="/stones/category/other"
-                                    style={categoryPillStyle}
-                                    className="category-pill"
-                                >
+                                <Link href="/stones/category/other" style={categoryPillStyle}>
                                     Other
                                 </Link>
                             </div>
                         </Reveal>
                     </div>
 
-                    {/* ✅ pass transformed stones so homepage displays price */}
                     <StoneFilters stones={stonesForHome} />
                 </div>
             </section>
@@ -144,15 +132,15 @@ export default async function Page() {
                     </Reveal>
                     <Reveal delayMs={200}>
                         <p style={partnersDescriptionStyle}>
-                            We collaborate with Sri Lanka&apos;s most respected gemological laboratories
-                            and certification authorities to ensure authenticity and quality.
+                            We collaborate with Sri Lanka&apos;s most respected gemological laboratories and
+                            certification authorities to ensure authenticity and quality.
                         </p>
                     </Reveal>
 
                     <Reveal delayMs={300}>
-                        <div style={partnersGridStyle} className="partners-grid">
-                            <div style={partnerCardStyle} className="partner-card">
-                                <div style={partnerLogoStyle} className="partner-logo">
+                        <div style={partnersGridStyle}>
+                            <div style={partnerCardStyle}>
+                                <div style={partnerLogoStyle}>
                                     <a href="https://www.gia.edu/" target="_blank" rel="noopener noreferrer">
                                         <img
                                             src="/GIA.jpg"
@@ -163,8 +151,8 @@ export default async function Page() {
                                 </div>
                             </div>
 
-                            <div style={partnerCardStyle} className="partner-card">
-                                <div style={partnerLogoStyle} className="partner-logo">
+                            <div style={partnerCardStyle}>
+                                <div style={partnerLogoStyle}>
                                     <a href="https://www.agclgemlab.com/" target="_blank" rel="noopener noreferrer">
                                         <img
                                             src="/AGCL.png"
@@ -175,8 +163,8 @@ export default async function Page() {
                                 </div>
                             </div>
 
-                            <div style={partnerCardStyle} className="partner-card">
-                                <div style={partnerLogoStyle} className="partner-logo">
+                            <div style={partnerCardStyle}>
+                                <div style={partnerLogoStyle}>
                                     <a
                                         href="https://www.facebook.com/p/RGTL-Rockland-Gem-Testing-Laboratory-100093904602773/"
                                         target="_blank"
@@ -191,8 +179,8 @@ export default async function Page() {
                                 </div>
                             </div>
 
-                            <div style={partnerCardStyle} className="partner-card">
-                                <div style={partnerLogoStyle} className="partner-logo">
+                            <div style={partnerCardStyle}>
+                                <div style={partnerLogoStyle}>
                                     <a href="https://www.gemlabanalysis.com/" target="_blank" rel="noopener noreferrer">
                                         <img
                                             src="/bellerophon.png"
@@ -218,11 +206,11 @@ export default async function Page() {
                     </Reveal>
                     <Reveal delayMs={200}>
                         <p style={contactDescriptionStyle}>
-                            For inquiries about our collection, private viewings, or bespoke sourcing,
-                            please reach out via email or telephone. All appointments are arranged by
-                            prior arrangement only.
+                            For inquiries about our collection, private viewings, or bespoke sourcing, please
+                            reach out via email or telephone. All appointments are arranged by prior arrangement only.
                         </p>
                     </Reveal>
+
                     <Reveal delayMs={300}>
                         <div style={contactGridStyle}>
                             <div style={contactBlockStyle}>
@@ -234,6 +222,7 @@ export default async function Page() {
                                     sandeepkap08@gmail.com
                                 </a>
                             </div>
+
                             <div style={contactBlockStyle}>
                                 <div style={contactLabelStyle}>Telephone</div>
                                 <a href="tel:+94777752858" style={contactValueLinkStyle}>
@@ -243,6 +232,7 @@ export default async function Page() {
                                     +1 608 421 2077
                                 </a>
                             </div>
+
                             <div style={contactBlockStyle}>
                                 <div style={contactLabelStyle}>Location</div>
                                 <div style={contactValueStyle}>
@@ -254,6 +244,7 @@ export default async function Page() {
                         </div>
                     </Reveal>
                 </div>
+
                 <div style={footerStyle}>
                     © {new Date().getFullYear()} CEYLON GEM COMPANY — Private sourcing by appointment
                 </div>
@@ -266,21 +257,22 @@ export default async function Page() {
 
 const pageStyle: React.CSSProperties = {
     fontFamily: `"Crimson Pro", "Cormorant Garamond", "EB Garamond", Georgia, serif`,
-    color: "#1a1a1a",
     backgroundColor: "#F9F8F6",
+    color: "#1a1a1a",
     minHeight: "100vh",
 };
 
+/* HERO */
 const heroSectionStyle: React.CSSProperties = {
-    backgroundColor: "#F9F8F6",
     position: "relative",
+    backgroundColor: "#F9F8F6",
 };
 
 const imageContainerStyle: React.CSSProperties = {
     width: "100%",
-    height: "50vh",
-    maxHeight: 500,
-    minHeight: 350,
+    height: "52vh",
+    minHeight: 440,
+    maxHeight: 720,
     position: "relative",
     overflow: "hidden",
     marginTop: 60,
@@ -292,54 +284,68 @@ const bannerImageStyle: React.CSSProperties = {
     objectFit: "cover",
     objectPosition: "center 60%",
     display: "block",
-    filter: "none",
 };
 
-const imageOverlayStyle: React.CSSProperties = {
+const imageFadeStyle: React.CSSProperties = {
     position: "absolute",
-    bottom: 0,
     left: 0,
     right: 0,
-    height: "15%",
-    background: "linear-gradient(to bottom, transparent, rgba(249, 248, 246, 0.3))",
+    bottom: 0,
+    height: "14%",
+    background: "linear-gradient(to bottom, rgba(249,248,246,0) 0%, rgba(249,248,246,0.92) 100%)",
     pointerEvents: "none",
 };
 
-const heroTextSectionStyle: React.CSSProperties = {
+/* Masthead */
+const mastheadWrapStyle: React.CSSProperties = {
     backgroundColor: "#F9F8F6",
-    padding: "60px 5vw",
+    padding: "48px 5vw 28px",
 };
 
-const heroContentStyle: React.CSSProperties = {
-    maxWidth: 1400,
+const mastheadInnerStyle: React.CSSProperties = {
+    maxWidth: 1200,
     margin: "0 auto",
     textAlign: "center",
 };
 
-const brandStyle: React.CSSProperties = {
+const mastheadRuleStyle: React.CSSProperties = {
+    height: 1,
+    width: "min(720px, 90%)",
+    margin: "0 auto",
+    backgroundColor: "rgba(26,26,26,0.10)",
+};
+
+const mastheadTopKickerStyle: React.CSSProperties = {
     fontSize: 10,
-    letterSpacing: "0.32em",
+    letterSpacing: "0.34em",
     textTransform: "uppercase",
+    color: "rgba(26,26,26,0.55)",
+    marginTop: 22,
+};
+
+const mastheadTitleStyle: React.CSSProperties = {
+    fontSize: "clamp(34px, 4.1vw, 54px)",
     fontWeight: 400,
-    color: "rgba(26, 26, 26, 0.5)",
-    marginBottom: 20,
-    lineHeight: 1.6,
-};
-
-const brandHeadingStyle: React.CSSProperties = {
-    ...brandStyle,
-    fontSize: "clamp(28px, 3.8vw, 50px)",
-    letterSpacing: "0.2em",
-    marginBottom: 0,
+    letterSpacing: "0.08em",
+    margin: "18px 0 12px",
     color: "#1a1a1a",
-    lineHeight: 1.12,
+    lineHeight: 1.1,
 };
 
+const mastheadSubStyle: React.CSSProperties = {
+    fontSize: 13,
+    letterSpacing: "0.18em",
+    textTransform: "uppercase",
+    color: "rgba(26,26,26,0.55)",
+    lineHeight: 1.7,
+    maxWidth: 860,
+    margin: "0 auto 22px",
+};
+
+/* Collection */
 const collectionSectionStyle: React.CSSProperties = {
-    backgroundColor: "#F9F8F6",
-    color: "#1a1a1a",
     padding: "60px 5vw 120px",
-    position: "relative",
+    backgroundColor: "#F9F8F6",
 };
 
 const collectionContainerStyle: React.CSSProperties = {
@@ -347,7 +353,7 @@ const collectionContainerStyle: React.CSSProperties = {
     margin: "0 auto",
 };
 
-/* ✅ Category nav styles */
+/* Category nav */
 const categoryNavWrapStyle: React.CSSProperties = {
     marginBottom: 36,
     display: "flex",
@@ -382,12 +388,11 @@ const categoryPillStyle: React.CSSProperties = {
     transition: "opacity 0.25s ease",
 };
 
-/* PARTNERS SECTION */
+/* Partners */
 const partnersSectionStyle: React.CSSProperties = {
     backgroundColor: "#ffffff",
     color: "#1a1a1a",
     padding: "140px 5vw",
-    position: "relative",
     borderTop: "1px solid rgba(26, 26, 26, 0.08)",
 };
 
@@ -418,9 +423,8 @@ const partnersDescriptionStyle: React.CSSProperties = {
     lineHeight: 1.7,
     color: "rgba(26, 26, 26, 0.6)",
     fontWeight: 300,
-    marginBottom: 80,
-    maxWidth: 640,
     margin: "0 auto 80px",
+    maxWidth: 640,
 };
 
 const partnersGridStyle: React.CSSProperties = {
@@ -433,14 +437,12 @@ const partnersGridStyle: React.CSSProperties = {
 
 const partnerCardStyle: React.CSSProperties = {
     display: "flex",
-    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     padding: "48px 40px",
     border: "1px solid rgba(26, 26, 26, 0.08)",
     backgroundColor: "rgba(249, 248, 246, 0.3)",
-    transition: "all 0.3s ease",
-    minHeight: "180px",
+    minHeight: 180,
 };
 
 const partnerLogoStyle: React.CSSProperties = {
@@ -453,7 +455,7 @@ const partnerLogoStyle: React.CSSProperties = {
 
 const logoImageStyle: React.CSSProperties = {
     maxWidth: "100%",
-    maxHeight: "120px",
+    maxHeight: 120,
     width: "auto",
     height: "auto",
     objectFit: "contain",
@@ -462,11 +464,11 @@ const logoImageStyle: React.CSSProperties = {
     transition: "all 0.3s ease",
 };
 
+/* Contact */
 const contactSectionStyle: React.CSSProperties = {
     backgroundColor: "#111111",
     color: "#F9F8F6",
     padding: "120px 5vw 80px",
-    position: "relative",
 };
 
 const contactContainerStyle: React.CSSProperties = {
@@ -526,7 +528,6 @@ const contactValueLinkStyle: React.CSSProperties = {
     borderBottom: "1px solid rgba(249, 248, 246, 0.1)",
     paddingBottom: 4,
     width: "fit-content",
-    transition: "opacity 0.3s ease",
 };
 
 const contactValueStyle: React.CSSProperties = {
