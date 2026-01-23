@@ -16,9 +16,10 @@ type StoneListItem = {
     images?: any[];
 };
 
+// ✅ UPDATED: Now sorts by sortOrder first, then creation date
 async function getStones(): Promise<StoneListItem[]> {
     return client.fetch(`
-    *[_type == "stone" && available == true] | order(_createdAt desc) {
+    *[_type == "stone" && available == true] | order(sortOrder asc, _createdAt desc) {
       _id,
       name,
       category,

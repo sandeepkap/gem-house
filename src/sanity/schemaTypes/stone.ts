@@ -21,6 +21,15 @@ export default defineType({
             initialValue: true,
         }),
 
+        // ✅ NEW: Custom sort order field
+        defineField({
+            name: "sortOrder",
+            title: "Sort Order",
+            type: "number",
+            description: "Set display order on homepage. Lower numbers appear first (1, 2, 3...). Leave empty to use creation date.",
+            validation: (R) => R.min(0).integer(),
+        }),
+
         defineField({ name: "category", title: "Category", type: "string" }),
         defineField({ name: "origin", title: "Origin", type: "string" }),
         defineField({ name: "carat", title: "Carat", type: "number" }),
