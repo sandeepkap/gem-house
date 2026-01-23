@@ -117,14 +117,12 @@ export default async function Page() {
                     <Reveal delayMs={220}>
                         <div style={contactGridStyle} className="contact-grid">
                             <div style={contactBlockStyle}>
-                                <div style={contactLabelStyle}>Website</div>
+                                <div style={contactLabelStyle}>Email</div>
                                 <a
-                                    href="https://ceylongemcompany.com"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                    href="mailto:ceylongemcompany.inquiries@gmail.com"
                                     style={contactValueLinkStyle}
                                 >
-                                    ceylongemcompany.com
+                                    ceylongemcompany.inquiries@gmail.com
                                 </a>
                             </div>
 
