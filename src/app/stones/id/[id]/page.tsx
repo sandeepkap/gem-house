@@ -6,6 +6,7 @@ import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
 import Reveal from "@/app/components/Reveal";
 import StoneGallery from "@/app/components/StoneGallery";
+import WhatsAppInquireLink from "@/app/components/WhatsAppInquireLink";
 
 type Stone = {
     _id: string;
@@ -31,21 +32,16 @@ type Stone = {
     comments?: string | null;
 };
 
-function buildWhatsAppLink(
-    phoneDigitsOnly: string,
-    stoneName: string,
-    carat?: number
-) {
+function buildWhatsAppLink(phoneDigitsOnly: string, stoneName: string, carat?: number) {
     const safePhone = String(phoneDigitsOnly).replace(/\D/g, "");
     const weightText = typeof carat === "number" ? ` (${carat} ct)` : "";
     const text = `Hello, I'm interested in ${stoneName}${weightText}. Please share availability, price, and certification details.`;
     return `https://wa.me/${safePhone}?text=${encodeURIComponent(text)}`;
 }
 
-
 async function getStoneById(idRaw: string): Promise<Stone | null> {
     const id = String(idRaw || "").trim();
-    if (!id) return null
+    if (!id) return null;
 
     // Support both published + drafts without changing your link mapping
     const draftId = id.startsWith("drafts.") ? id : `drafts.${id}`;
@@ -77,8 +73,7 @@ async function getStoneById(idRaw: string): Promise<Stone | null> {
 
 function formatPrice(stone: Stone) {
     const por = Boolean(stone.priceOnRequest);
-    const priceNum =
-        typeof stone.price === "number" && Number.isFinite(stone.price) ? stone.price : null;
+    const priceNum = typeof stone.price === "number" && Number.isFinite(stone.price) ? stone.price : null;
 
     if (por || priceNum === null) return "Price on request";
 
@@ -137,6 +132,10 @@ export default async function StoneByIdPage({
     const imageUrls = (stone.images || []).map((img: any) =>
         urlFor(img).width(1600).fit("max").auto("format").url()
     );
+
+    // Inquiry tracking URL (current tab) + WhatsApp URL (new tab)
+    const inquireHref = `/inquire/id/${encodeURIComponent(stone._id)}`;
+    const whatsappHref = buildWhatsAppLink("94777752858", stone.name, stone.carat);
 
     return (
         <main style={pageStyle}>
@@ -274,15 +273,13 @@ export default async function StoneByIdPage({
                                     hasinirana1@gmail.com
                                 </a>
 
-                                <a
-                                    href={buildWhatsAppLink("94777752858", stone.name, stone.carat)}
+                                {/* Opens WhatsApp in a NEW TAB, and loads /inquire/... in the CURRENT TAB for tracking */}
+                                <WhatsAppInquireLink
+                                    inquireHref={inquireHref}
+                                    whatsappHref={whatsappHref}
                                     style={whatsAppLinkStyle}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <span style={whatsAppIconStyle}>→</span>
-                                    WhatsApp Inquiry
-                                </a>
+                                    iconStyle={whatsAppIconStyle}
+                                />
 
                                 <div style={contactNoteStyle}>Pre-filled message references {stone.name}</div>
                             </div>
