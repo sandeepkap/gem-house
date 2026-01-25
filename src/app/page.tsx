@@ -1,23 +1,21 @@
 export const revalidate = 0;
 
+import Link from "next/link";
 import { client } from "@/sanity/lib/client";
 import Reveal from "@/app/components/Reveal";
 import StoneFilters from "@/app/components/StoneFilters";
 import Navigation from "@/app/components/Navigation";
 
-/* ------------------ TYPES ------------------ */
-
 type StoneListItem = {
     _id: string;
     name: string;
     category: string;
+    realCategory?: string;
     origin?: string;
     carat?: number;
     price?: number | null;
     images?: any[];
 };
-
-/* ------------------ DATA ------------------ */
 
 async function getStones(): Promise<StoneListItem[]> {
     return client.fetch(`
@@ -43,14 +41,14 @@ function formatPrice(price?: number | null) {
     }).format(price);
 }
 
-/* ------------------ PAGE ------------------ */
-
 export default async function Page() {
     const stones = await getStones();
 
+    // ✅ Preserve real category + show PRICE where StoneFilters displays it
     const stonesForHome: StoneListItem[] = stones.map((s) => ({
         ...s,
-        category: formatPrice(s.price),
+        realCategory: s.category, // Store the actual category for filtering
+        category: formatPrice(s.price), // Display price instead
     }));
 
     return (
@@ -83,17 +81,16 @@ export default async function Page() {
                 </div>
             </section>
 
-            {/* COLLECTION */}
+            {/* COLLECTION - Category buttons are now inside StoneFilters */}
             <section id="collection" style={collectionSectionStyle}>
                 <div style={collectionContainerStyle}>
                     <StoneFilters stones={stonesForHome} />
                 </div>
             </section>
 
-            {/* CONTACT / FOOTER (mobile-first, responsive) */}
+            {/* CONTACT / FOOTER */}
             <section id="contact" style={contactSectionStyle}>
                 <div style={contactOuterStyle}>
-                    {/* Header */}
                     <div style={contactHeaderWrapStyle} className="contact-header">
                         <div>
                             <Reveal delayMs={0}>
@@ -107,13 +104,12 @@ export default async function Page() {
                         <Reveal delayMs={140}>
                             <p style={contactDescriptionStyle} className="contact-desc">
                                 For inquiries about our collection, private viewings, or bespoke sourcing,
-                                please contact us via telephone or visit our website. All appointments are
-                                arranged strictly by prior arrangement.
+                                please contact us via telephone or email. All appointments are arranged strictly
+                                by prior arrangement.
                             </p>
                         </Reveal>
                     </div>
 
-                    {/* Details */}
                     <Reveal delayMs={220}>
                         <div style={contactGridStyle} className="contact-grid">
                             <div style={contactBlockStyle}>
@@ -149,7 +145,6 @@ export default async function Page() {
 
                     <div style={contactRuleStyle} />
 
-                    {/* Socials */}
                     <Reveal delayMs={300}>
                         <div style={socialRowStyle} className="social-row">
                             <div style={socialLabelStyle}>Follow</div>
@@ -179,7 +174,6 @@ export default async function Page() {
                     © {new Date().getFullYear()} CEYLON GEM COMPANY — Private sourcing by appointment
                 </div>
 
-                {/* Responsive tweaks (keeps old-money feel, fixes mobile) */}
                 <style>{`
           @media (max-width: 980px) {
             .contact-header { grid-template-columns: 1fr !important; gap: 26px !important; }
@@ -201,7 +195,6 @@ const pageStyle: React.CSSProperties = {
     color: "#1a1a1a",
 };
 
-/* HERO */
 const heroSectionStyle: React.CSSProperties = { position: "relative" };
 const imageContainerStyle: React.CSSProperties = {
     height: "52vh",
@@ -227,7 +220,6 @@ const imageFadeStyle: React.CSSProperties = {
     pointerEvents: "none",
 };
 
-/* Masthead */
 const mastheadWrapStyle: React.CSSProperties = { backgroundColor: "#F9F8F6", padding: "48px 5vw 28px" };
 const mastheadInnerStyle: React.CSSProperties = { maxWidth: 1400, margin: "0 auto", textAlign: "center" };
 const mastheadRuleStyle: React.CSSProperties = {
@@ -261,11 +253,9 @@ const mastheadSubStyle: React.CSSProperties = {
     margin: "0 auto 22px",
 };
 
-/* Collection */
 const collectionSectionStyle: React.CSSProperties = { padding: "80px 5vw", backgroundColor: "#F9F8F6" };
 const collectionContainerStyle: React.CSSProperties = { maxWidth: 1600, margin: "0 auto" };
 
-/* Contact */
 const contactSectionStyle: React.CSSProperties = {
     backgroundColor: "#111111",
     color: "#F9F8F6",

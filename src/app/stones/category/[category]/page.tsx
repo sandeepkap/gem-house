@@ -16,10 +16,12 @@ type StoneListItem = {
     images?: any[];
 };
 
-// Canonical category strings to exclude for "other" (all lowercase)
+// ✅ FIXED: Added ruby/rubies to PRIMARY_CATEGORIES
 const PRIMARY_CATEGORIES = [
     "sapphire",
     "sapphires",
+    "ruby",
+    "rubies",
     "padparadscha",
     "padparadscha sapphire",
     "padparadscha sapphires",
@@ -27,20 +29,28 @@ const PRIMARY_CATEGORIES = [
     "spinels",
 ];
 
-// slug -> accepted Sanity category values (case-insensitive)
+// ✅ FIXED: Added ruby to CATEGORY_ALIASES
 const CATEGORY_ALIASES: Record<string, string[]> = {
     sapphire: ["Sapphire", "Sapphires"],
+    ruby: ["Ruby", "Rubies"],
     padparadscha: ["Padparadscha", "Padparadscha Sapphire", "Padparadscha Sapphires"],
-    // optional typo support if you ever link it
     padmaradcha: ["Padparadscha", "Padparadscha Sapphire", "Padmaradcha", "Padmaradcha Sapphire"],
     spinel: ["Spinel", "Spinels"],
-    // "other" handled by query logic (not aliases)
 };
 
 function titleCaseSlug(slug: string) {
     return slug
         .replace(/-/g, " ")
         .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function formatPrice(price?: number | null) {
+    if (price === null || price === undefined) return "Price on request";
+    return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0,
+    }).format(price);
 }
 
 async function getStonesByCategories(categories: string[]): Promise<StoneListItem[]> {
@@ -53,7 +63,7 @@ async function getStonesByCategories(categories: string[]): Promise<StoneListIte
           available == true &&
           defined(category) &&
           lower(category) in $categoriesLower
-        ] | order(_createdAt desc) {
+        ] | order(sortOrder asc, _createdAt desc) {
           _id,
           name,
           category,
@@ -75,7 +85,7 @@ async function getOtherStones(): Promise<StoneListItem[]> {
           available == true &&
           defined(category) &&
           !(lower(category) in $excluded)
-        ] | order(_createdAt desc) {
+        ] | order(sortOrder asc, _createdAt desc) {
           _id,
           name,
           category,
@@ -94,7 +104,6 @@ export default async function CategoryPage({
                                            }: {
     params: Promise<{ category: string }>;
 }) {
-    // Next 16 sync-dynamic-apis: params may be a Promise
     const { category } = await params;
 
     const slug = decodeURIComponent(category).trim().toLowerCase();
@@ -111,6 +120,12 @@ export default async function CategoryPage({
         stones = aliases.length > 0 ? await getStonesByCategories(aliases) : [];
     }
 
+    // ✅ Show PRICE instead of category (like homepage)
+    const stonesForDisplay: StoneListItem[] = stones.map((s) => ({
+        ...s,
+        category: formatPrice(s.price),
+    }));
+
     return (
         <div style={pageStyle}>
             <Navigation />
@@ -124,7 +139,8 @@ export default async function CategoryPage({
                         <div style={titleStyle}>{heading}</div>
                     </div>
 
-                    <StoneFilters stones={stones} />
+                    {/* ✅ Pass stones with price displayed */}
+                    <StoneFilters stones={stonesForDisplay} />
 
                     {slug !== "other" && (CATEGORY_ALIASES[slug] ?? []).length === 0 && (
                         <div style={noteStyle}>
