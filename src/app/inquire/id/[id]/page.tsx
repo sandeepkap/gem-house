@@ -44,7 +44,7 @@ export default async function InquireByIdPage({
     const carat = stone?.carat;
 
     // Keep your WhatsApp number here
-    const whatsappHref = buildWhatsAppLink("94777752858", stoneName, carat);
+    const whatsappHref = buildWhatsAppLink("16084212077", stoneName, carat);
 
     return (
         <main style={pageStyle}>

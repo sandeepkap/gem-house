@@ -135,7 +135,7 @@ export default async function StoneByIdPage({
 
     // Inquiry tracking URL (current tab) + WhatsApp URL (new tab)
     const inquireHref = `/inquire/id/${encodeURIComponent(stone._id)}`;
-    const whatsappHref = buildWhatsAppLink("94777752858", stone.name, stone.carat);
+    const whatsappHref = buildWhatsAppLink("16084212077", stone.name, stone.carat);
 
     return (
         <main style={pageStyle}>
