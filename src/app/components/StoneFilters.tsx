@@ -63,7 +63,7 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
     }, [stones]);
 
     const caratMinMax = useMemo(() => {
-        return { min: 0, max: 8 };
+        return { min: 0, max: 9 };
     }, []);
 
     const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
