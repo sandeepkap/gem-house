@@ -9,8 +9,8 @@ import Reveal from "@/app/components/Reveal";
 type StoneListItem = {
     _id: string;
     name: string;
-    category?: string;
-    realCategory?: string; // ✅ NEW: Store the actual category
+    category?: string;       // On your home page you overwrite this with price text
+    realCategory?: string;   // Real category for filtering (your page.tsx sets this)
     origin?: string;
     carat?: number;
     price?: number | null;
@@ -23,54 +23,80 @@ function uniqSorted(values: (string | undefined)[]) {
     );
 }
 
-function clamp(n: number, min: number, max: number) {
-    return Math.max(min, Math.min(max, n));
-}
+/**
+ * Category matching:
+ * - Uses realCategory if present (preferred), else falls back to category.
+ * - Matches by substring (case-insensitive) so "Blue Sapphire" still matches "sapphire".
+ * - Special-case: sapphire excludes padparadscha.
+ */
+function matchesCategory(stoneCategoryRaw: unknown, filter: string): boolean {
+    if (!stoneCategoryRaw || !filter) return false;
 
-// ✅ Category matching logic
-function matchesCategory(stoneCategory: string | undefined, filterCategory: string): boolean {
-    if (!stoneCategory) return false;
+    const stoneCategory =
+        typeof stoneCategoryRaw === "string"
+            ? stoneCategoryRaw
+            : Array.isArray(stoneCategoryRaw)
+                ? stoneCategoryRaw.join(" ")
+                : String(stoneCategoryRaw);
+
     const lower = stoneCategory.toLowerCase();
+    const f = filter.toLowerCase().trim();
 
-    switch (filterCategory) {
-        case "sapphire":
-            return lower.includes("sapphire") && !lower.includes("padparadscha");
-        case "ruby":
-            return lower.includes("ruby");
-        case "padparadscha":
-            return lower.includes("padparadscha");
-        case "spinel":
-            return lower.includes("spinel");
-        case "other":
-            return !lower.includes("sapphire") &&
-                !lower.includes("ruby") &&
-                !lower.includes("padparadscha") &&
-                !lower.includes("spinel");
-        default:
-            return false;
-    }
+    if (f === "sapphire") return lower.includes("sapphire") && !lower.includes("padparadscha");
+    return lower.includes(f);
 }
+
+/* ------------------ OPTIONS (NO "JEWELRY") ------------------ */
+/* Use real gem categories only. If none exist in stock, you’ll naturally get 0 results. */
+const birthstoneOptions: { label: string; filters: string[] }[] = [
+    { label: "January (Garnet)", filters: ["garnet"] },
+    { label: "May (Emerald)", filters: ["emerald"] },
+    { label: "June (Alexandrite, Pearl)", filters: ["alexandrite", "pearl"] },
+    { label: "July (Ruby)", filters: ["ruby"] },
+    { label: "August (Spinel, Peridot)", filters: ["spinel", "peridot"] },
+    { label: "September (Sapphire)", filters: ["sapphire"] },
+    { label: "October (Opal, Tourmaline)", filters: ["opal", "tourmaline"] },
+];
+
+const gemTypeOptions: { label: string; filters: string[] }[] = [
+    { label: "Sapphire", filters: ["sapphire"] },
+    { label: "Ruby", filters: ["ruby"] },
+    { label: "Padparadscha", filters: ["padparadscha"] },
+    { label: "Spinel", filters: ["spinel"] },
+    { label: "Garnet", filters: ["garnet"] },
+    { label: "Emerald", filters: ["emerald"] },
+    { label: "Alexandrite", filters: ["alexandrite"] },
+    { label: "Opal", filters: ["opal"] },
+    { label: "Tourmaline", filters: ["tourmaline"] },
+    { label: "Peridot", filters: ["peridot"] },
+    { label: "Pearl", filters: ["pearl"] },
+];
 
 export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
     const defaultLocations = ["Sri Lanka", "USA"];
 
     const locations = useMemo(() => {
         const fromData = uniqSorted(stones.map((s) => s.origin));
-        const merged = Array.from(new Set([...defaultLocations, ...fromData])).sort((a, b) =>
+        return Array.from(new Set([...defaultLocations, ...fromData])).sort((a, b) =>
             a.localeCompare(b)
         );
-        return merged;
     }, [stones]);
 
-    const caratMinMax = useMemo(() => {
-        return { min: 0, max: 9 };
-    }, []);
+    const caratMinMax = useMemo(() => ({ min: 0, max: 9 }), []);
 
     const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
-    const [selectedCategories, setSelectedCategories] = useState<string[]>([]); // ✅ NEW
-    const [caratRange, setCaratRange] = useState<[number, number]>([caratMinMax.min, caratMinMax.max]);
+    const [caratRange, setCaratRange] = useState<[number, number]>([
+        caratMinMax.min,
+        caratMinMax.max,
+    ]);
+
+    // ✅ Checkbox group state
+    const [selectedBirthstones, setSelectedBirthstones] = useState<string[]>([]);
+    const [selectedGemTypes, setSelectedGemTypes] = useState<string[]>([]);
 
     const [expandedSections, setExpandedSections] = useState({
+        birthstone: true,
+        gemType: true,
         location: true,
         carat: true,
     });
@@ -87,10 +113,19 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
         setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
     };
 
-    // ✅ Toggle category filter
-    const toggleCategory = (cat: string) => {
-        setSelectedCategories((prev) => toggle(prev, cat));
-    };
+    // ✅ Derive selected category filters from the checked boxes (no conflicting state)
+    const selectedCategoryFilters = useMemo<string[]>(() => {
+        const out: string[] = [];
+
+        for (const opt of birthstoneOptions) {
+            if (selectedBirthstones.includes(opt.label)) out.push(...opt.filters);
+        }
+        for (const opt of gemTypeOptions) {
+            if (selectedGemTypes.includes(opt.label)) out.push(...opt.filters);
+        }
+
+        return Array.from(new Set(out));
+    }, [selectedBirthstones, selectedGemTypes]);
 
     const filtered = useMemo(() => {
         return stones.filter((s) => {
@@ -99,10 +134,11 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                 if (!s.origin || !selectedLocations.includes(s.origin)) return false;
             }
 
-            // ✅ Category filter
-            if (selectedCategories.length > 0) {
-                const matchesAny = selectedCategories.some(cat =>
-                    matchesCategory(s.realCategory, cat)
+            // Category filter
+            if (selectedCategoryFilters.length > 0) {
+                const haystack = s.realCategory ?? s.category;
+                const matchesAny = selectedCategoryFilters.some((f) =>
+                    matchesCategory(haystack, f)
                 );
                 if (!matchesAny) return false;
             }
@@ -111,13 +147,14 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
             if (typeof s.carat === "number") {
                 if (s.carat < caratRange[0] || s.carat > caratRange[1]) return false;
             } else {
-                const isCaratFiltered = caratRange[0] !== caratMinMax.min || caratRange[1] !== caratMinMax.max;
+                const isCaratFiltered =
+                    caratRange[0] !== caratMinMax.min || caratRange[1] !== caratMinMax.max;
                 if (isCaratFiltered) return false;
             }
 
             return true;
         });
-    }, [stones, selectedLocations, selectedCategories, caratRange, caratMinMax.min, caratMinMax.max]);
+    }, [stones, selectedLocations, selectedCategoryFilters, caratRange, caratMinMax.min, caratMinMax.max]);
 
     const countsByLocation = useMemo(() => {
         const m = new Map<string, number>();
@@ -128,90 +165,22 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
         return m;
     }, [stones]);
 
-    // ✅ Count by category
-    const countsByCategory = useMemo(() => {
-        const counts = {
-            sapphire: 0,
-            ruby: 0,
-            padparadscha: 0,
-            spinel: 0,
-            other: 0,
-        };
-        stones.forEach((s) => {
-            if (matchesCategory(s.realCategory, "sapphire")) counts.sapphire++;
-            else if (matchesCategory(s.realCategory, "ruby")) counts.ruby++;
-            else if (matchesCategory(s.realCategory, "padparadscha")) counts.padparadscha++;
-            else if (matchesCategory(s.realCategory, "spinel")) counts.spinel++;
-            else counts.other++;
-        });
-        return counts;
-    }, [stones]);
-
     function resetAll() {
         setSelectedLocations([]);
-        setSelectedCategories([]);
+        setSelectedBirthstones([]);
+        setSelectedGemTypes([]);
         setCaratRange([caratMinMax.min, caratMinMax.max]);
     }
 
     const hasActiveFilters =
         selectedLocations.length > 0 ||
-        selectedCategories.length > 0 ||
+        selectedBirthstones.length > 0 ||
+        selectedGemTypes.length > 0 ||
         caratRange[0] !== caratMinMax.min ||
         caratRange[1] !== caratMinMax.max;
 
     return (
         <>
-            {/* ✅ Category filter buttons */}
-            <div style={categoryNavWrapStyle}>
-                <Reveal delayMs={0}>
-                    <div style={categoryNavTitleStyle}>Browse by stone</div>
-                </Reveal>
-
-                <Reveal delayMs={80}>
-                    <div style={categoryNavStyle}>
-                        <button
-                            onClick={() => toggleCategory("sapphire")}
-                            style={selectedCategories.includes("sapphire") ? activePillStyle : categoryPillStyle}
-                            type="button"
-                        >
-                            Sapphires
-                        </button>
-
-                        <button
-                            onClick={() => toggleCategory("ruby")}
-                            style={selectedCategories.includes("ruby") ? activePillStyle : categoryPillStyle}
-                            type="button"
-                        >
-                            Ruby
-                        </button>
-
-                        <button
-                            onClick={() => toggleCategory("padparadscha")}
-                            style={selectedCategories.includes("padparadscha") ? activePillStyle : categoryPillStyle}
-                            type="button"
-                        >
-                            Padparadscha
-                        </button>
-
-                        <button
-                            onClick={() => toggleCategory("spinel")}
-                            style={selectedCategories.includes("spinel") ? activePillStyle : categoryPillStyle}
-                            type="button"
-                        >
-                            Spinel
-                        </button>
-
-                        <button
-                            onClick={() => toggleCategory("other")}
-                            style={selectedCategories.includes("other") ? activePillStyle : categoryPillStyle}
-                            type="button"
-                        >
-                            Other
-                        </button>
-                    </div>
-                </Reveal>
-            </div>
-
             <div style={wrapStyle} className="stones-filter-wrap">
                 <aside style={sidebarStyle} className="filter-sidebar">
                     <div style={sidebarHeaderStyle}>
@@ -220,6 +189,68 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                             <button onClick={resetAll} style={resetBtnStyle} type="button">
                                 Clear All
                             </button>
+                        )}
+                    </div>
+
+                    {/* Birthstone */}
+                    <div style={filterSectionStyle}>
+                        <button
+                            onClick={() => toggleSection("birthstone")}
+                            style={sectionHeaderStyle}
+                            type="button"
+                        >
+                            <span style={sectionTitleStyle}>Birthstone</span>
+                            <span style={chevronStyle}>
+                                {expandedSections.birthstone ? "−" : "+"}
+                            </span>
+                        </button>
+
+                        {expandedSections.birthstone && (
+                            <div style={sectionContentStyle}>
+                                {birthstoneOptions.map((opt) => (
+                                    <label key={opt.label} style={checkboxLabelStyle}>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedBirthstones.includes(opt.label)}
+                                            onChange={() =>
+                                                setSelectedBirthstones((p) => toggle(p, opt.label))
+                                            }
+                                            style={checkboxInputStyle}
+                                        />
+                                        <span style={checkboxTextStyle}>{opt.label}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Gem type */}
+                    <div style={filterSectionStyle}>
+                        <button
+                            onClick={() => toggleSection("gemType")}
+                            style={sectionHeaderStyle}
+                            type="button"
+                        >
+                            <span style={sectionTitleStyle}>Gem type</span>
+                            <span style={chevronStyle}>{expandedSections.gemType ? "−" : "+"}</span>
+                        </button>
+
+                        {expandedSections.gemType && (
+                            <div style={sectionContentStyle}>
+                                {gemTypeOptions.map((opt) => (
+                                    <label key={opt.label} style={checkboxLabelStyle}>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedGemTypes.includes(opt.label)}
+                                            onChange={() =>
+                                                setSelectedGemTypes((p) => toggle(p, opt.label))
+                                            }
+                                            style={checkboxInputStyle}
+                                        />
+                                        <span style={checkboxTextStyle}>{opt.label}</span>
+                                    </label>
+                                ))}
+                            </div>
                         )}
                     </div>
 
@@ -232,7 +263,9 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                                 type="button"
                             >
                                 <span style={sectionTitleStyle}>Location</span>
-                                <span style={chevronStyle}>{expandedSections.location ? "−" : "+"}</span>
+                                <span style={chevronStyle}>
+                                    {expandedSections.location ? "−" : "+"}
+                                </span>
                             </button>
 
                             {expandedSections.location && (
@@ -242,11 +275,15 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                                             <input
                                                 type="checkbox"
                                                 checked={selectedLocations.includes(loc)}
-                                                onChange={() => setSelectedLocations((a) => toggle(a, loc))}
+                                                onChange={() =>
+                                                    setSelectedLocations((a) => toggle(a, loc))
+                                                }
                                                 style={checkboxInputStyle}
                                             />
                                             <span style={checkboxTextStyle}>{loc}</span>
-                                            <span style={countStyle}>({countsByLocation.get(loc) || 0})</span>
+                                            <span style={countStyle}>
+                                                ({countsByLocation.get(loc) || 0})
+                                            </span>
                                         </label>
                                     ))}
                                 </div>
@@ -294,7 +331,10 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                                         step={0.5}
                                         value={caratRange[0]}
                                         onChange={(e) =>
-                                            setCaratRange(([a, b]) => [Math.min(Number(e.target.value), b), b])
+                                            setCaratRange(([a, b]) => [
+                                                Math.min(Number(e.target.value), b),
+                                                b,
+                                            ])
                                         }
                                         style={sliderStyle}
                                         className="range-slider"
@@ -340,7 +380,10 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
 
                                             <div style={cardContentStyle}>
                                                 <div style={cardHeaderStyle}>
-                                                    <div style={stoneNameStyle} className="stone-name-style">{s.name}</div>
+                                                    <div style={stoneNameStyle} className="stone-name-style">
+                                                        {s.name}
+                                                    </div>
+
                                                     {s.category && (
                                                         <div
                                                             style={
@@ -354,6 +397,7 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                                                         </div>
                                                     )}
                                                 </div>
+
                                                 <div style={stoneMetaStyle} className="stone-meta-style">
                                                     {s.origin || "Origin undisclosed"}
                                                     {typeof s.carat === "number" && ` · ${s.carat} ct`}
@@ -380,61 +424,6 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
 }
 
 /* ------------------ STYLES ------------------ */
-
-// ✅ Category nav styles
-const categoryNavWrapStyle: React.CSSProperties = {
-    marginBottom: 44,
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 14,
-};
-
-const categoryNavTitleStyle: React.CSSProperties = {
-    fontSize: 10,
-    letterSpacing: "0.32em",
-    textTransform: "uppercase",
-    color: "rgba(26, 26, 26, 0.45)",
-};
-
-const categoryNavStyle: React.CSSProperties = {
-    display: "flex",
-    gap: 12,
-    flexWrap: "wrap",
-    justifyContent: "center",
-};
-
-const categoryPillStyle: React.CSSProperties = {
-    textDecoration: "none",
-    color: "#1a1a1a",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "rgba(26, 26, 26, 0.14)",
-    backgroundColor: "rgba(255, 255, 255, 0.65)",
-    padding: "10px 14px",
-    fontSize: 12,
-    letterSpacing: "0.12em",
-    textTransform: "uppercase",
-    transition: "all 0.25s ease",
-    cursor: "pointer",
-    fontFamily: "inherit",
-};
-
-const activePillStyle: React.CSSProperties = {
-    textDecoration: "none",
-    color: "#F9F8F6",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "#1a1a1a",
-    backgroundColor: "#1a1a1a",
-    padding: "10px 14px",
-    fontSize: 12,
-    letterSpacing: "0.12em",
-    textTransform: "uppercase",
-    transition: "all 0.25s ease",
-    cursor: "pointer",
-    fontFamily: "inherit",
-};
 
 const wrapStyle: React.CSSProperties = {
     display: "grid",
@@ -641,7 +630,8 @@ const cardStyle: React.CSSProperties = {
     textDecoration: "none",
     color: "inherit",
     display: "block",
-    transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+    transition:
+        "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
     cursor: "pointer",
 };
 
