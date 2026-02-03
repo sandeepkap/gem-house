@@ -728,12 +728,21 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
 /* ------------------ MOBILE BAR + DRAWER STYLES ------------------ */
 
 const mobileFilterBarStyle: React.CSSProperties = {
+    position: "sticky",
+    top: 72, // adjust if your nav is taller/shorter
+    zIndex: 50,
     display: "flex",
     gap: 12,
     alignItems: "center",
     justifyContent: "flex-start",
+    padding: "12px 0",
     marginBottom: 22,
+
+    // so text/cards don't show through while scrolling
+    background: "#F9F8F6",
+    borderBottom: "1px solid rgba(10,10,10,0.08)",
 };
+
 
 const mobileFilterBtnStyle: React.CSSProperties = {
     border: "1px solid #0a0a0a",
