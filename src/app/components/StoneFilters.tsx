@@ -9,8 +9,8 @@ import Reveal from "@/app/components/Reveal";
 type StoneListItem = {
     _id: string;
     name: string;
-    category?: string;       // On your home page you overwrite this with price text
-    realCategory?: string;   // Real category for filtering (your page.tsx sets this)
+    category?: string;       // on your home page you set this to price text
+    realCategory?: string;   // real category for filtering (your page.tsx sets this)
     origin?: string;
     carat?: number;
     price?: number | null;
@@ -25,9 +25,9 @@ function uniqSorted(values: (string | undefined)[]) {
 
 /**
  * Category matching:
- * - Uses realCategory if present (preferred), else falls back to category.
- * - Matches by substring (case-insensitive) so "Blue Sapphire" still matches "sapphire".
- * - Special-case: sapphire excludes padparadscha.
+ * - uses realCategory if present, else falls back to category
+ * - substring match (case-insensitive)
+ * - sapphire excludes padparadscha
  */
 function matchesCategory(stoneCategoryRaw: unknown, filter: string): boolean {
     if (!stoneCategoryRaw || !filter) return false;
@@ -47,7 +47,7 @@ function matchesCategory(stoneCategoryRaw: unknown, filter: string): boolean {
 }
 
 /* ------------------ OPTIONS (NO "JEWELRY") ------------------ */
-/* Use real gem categories only. If none exist in stock, you’ll naturally get 0 results. */
+
 const birthstoneOptions: { label: string; filters: string[] }[] = [
     { label: "January (Garnet)", filters: ["garnet"] },
     { label: "May (Emerald)", filters: ["emerald"] },
@@ -90,7 +90,7 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
         caratMinMax.max,
     ]);
 
-    // ✅ Checkbox group state
+    // checkbox group state
     const [selectedBirthstones, setSelectedBirthstones] = useState<string[]>([]);
     const [selectedGemTypes, setSelectedGemTypes] = useState<string[]>([]);
 
@@ -101,9 +101,36 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
         carat: true,
     });
 
+    // mobile drawer state
+    const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const mq = window.matchMedia("(max-width: 980px)");
+        const apply = () => setIsMobile(mq.matches);
+        apply();
+        mq.addEventListener?.("change", apply);
+        return () => mq.removeEventListener?.("change", apply);
+    }, []);
+
     useEffect(() => {
         setCaratRange([caratMinMax.min, caratMinMax.max]);
     }, [caratMinMax.min, caratMinMax.max]);
+
+    // If user resizes to desktop, force drawer closed
+    useEffect(() => {
+        if (!isMobile) setMobileFiltersOpen(false);
+    }, [isMobile]);
+
+    // lock body scroll only when drawer is open on mobile
+    useEffect(() => {
+        if (!isMobile || !mobileFiltersOpen) return;
+        const prev = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = prev;
+        };
+    }, [isMobile, mobileFiltersOpen]);
 
     function toggle(arr: string[], v: string) {
         return arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
@@ -113,7 +140,7 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
         setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
     };
 
-    // ✅ Derive selected category filters from the checked boxes (no conflicting state)
+    // derive selected filters from checked boxes
     const selectedCategoryFilters = useMemo<string[]>(() => {
         const out: string[] = [];
 
@@ -129,12 +156,12 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
 
     const filtered = useMemo(() => {
         return stones.filter((s) => {
-            // Location filter
+            // location
             if (selectedLocations.length > 0) {
                 if (!s.origin || !selectedLocations.includes(s.origin)) return false;
             }
 
-            // Category filter
+            // category
             if (selectedCategoryFilters.length > 0) {
                 const haystack = s.realCategory ?? s.category;
                 const matchesAny = selectedCategoryFilters.some((f) =>
@@ -143,7 +170,7 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                 if (!matchesAny) return false;
             }
 
-            // Carat filter
+            // carat
             if (typeof s.carat === "number") {
                 if (s.carat < caratRange[0] || s.carat > caratRange[1]) return false;
             } else {
@@ -179,8 +206,279 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
         caratRange[0] !== caratMinMax.min ||
         caratRange[1] !== caratMinMax.max;
 
+    const activeFiltersCount =
+        selectedLocations.length +
+        selectedBirthstones.length +
+        selectedGemTypes.length +
+        (caratRange[0] !== caratMinMax.min || caratRange[1] !== caratMinMax.max ? 1 : 0);
+
     return (
         <>
+            <style>{`
+        /* Mobile: show filter button (bar). Drawer uses fixed positioning. */
+        @media (max-width: 980px) {
+          .stones-filter-wrap {
+            grid-template-columns: 1fr !important;
+            gap: 0 !important;
+          }
+          .filter-sidebar {
+            display: none !important;
+          }
+          .filter-results {
+            width: 100%;
+          }
+        }
+
+        /* Drawer */
+        .filters-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(10,10,10,0.40);
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 220ms ease;
+          z-index: 9998;
+        }
+        .filters-overlay.open {
+          opacity: 1;
+          pointer-events: auto;
+        }
+
+        .filters-drawer {
+          position: fixed;
+          top: 0;
+          left: 0;
+          height: 100vh;
+          width: min(360px, 86vw);
+          background: #ffffff;
+          border-right: 1px solid rgba(10,10,10,0.10);
+          transform: translateX(-102%);
+          transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+          z-index: 9999;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          padding: 24px 18px;
+          font-family: "Crimson Pro","Cormorant Garamond",Georgia,serif;
+        }
+        .filters-drawer.open {
+          transform: translateX(0);
+        }
+      `}</style>
+
+            {/* Mobile Filter bar (ONLY on mobile) */}
+            {isMobile && (
+                <div style={mobileFilterBarStyle}>
+                    <button
+                        type="button"
+                        style={mobileFilterBtnStyle}
+                        onClick={() => setMobileFiltersOpen(true)}
+                    >
+                        Filter{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ""}
+                    </button>
+
+                    {hasActiveFilters && (
+                        <button type="button" style={mobileClearBtnStyle} onClick={resetAll}>
+                            Clear
+                        </button>
+                    )}
+                </div>
+            )}
+
+            {/* Drawer overlay + drawer (ONLY on mobile) */}
+            {isMobile && (
+                <>
+                    <div
+                        className={`filters-overlay ${mobileFiltersOpen ? "open" : ""}`}
+                        onClick={() => setMobileFiltersOpen(false)}
+                    />
+
+                    <div className={`filters-drawer ${mobileFiltersOpen ? "open" : ""}`}>
+                        <div style={drawerHeaderStyle}>
+                            <div style={drawerTitleStyle}>Filters</div>
+                            <button
+                                type="button"
+                                style={drawerCloseBtnStyle}
+                                onClick={() => setMobileFiltersOpen(false)}
+                                aria-label="Close filters"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        {hasActiveFilters && (
+                            <button type="button" style={drawerClearAllStyle} onClick={resetAll}>
+                                Clear All
+                            </button>
+                        )}
+
+                        {/* Birthstone */}
+                        <div style={drawerSectionStyle}>
+                            <button
+                                onClick={() => toggleSection("birthstone")}
+                                style={sectionHeaderStyle}
+                                type="button"
+                            >
+                                <span style={sectionTitleStyle}>Birthstone</span>
+                                <span style={chevronStyle}>
+                                    {expandedSections.birthstone ? "−" : "+"}
+                                </span>
+                            </button>
+
+                            {expandedSections.birthstone && (
+                                <div style={sectionContentStyle}>
+                                    {birthstoneOptions.map((opt) => (
+                                        <label key={opt.label} style={checkboxLabelStyle}>
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedBirthstones.includes(opt.label)}
+                                                onChange={() =>
+                                                    setSelectedBirthstones((p) => toggle(p, opt.label))
+                                                }
+                                                style={checkboxInputStyle}
+                                            />
+                                            <span style={checkboxTextStyle}>{opt.label}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Gem type */}
+                        <div style={drawerSectionStyle}>
+                            <button
+                                onClick={() => toggleSection("gemType")}
+                                style={sectionHeaderStyle}
+                                type="button"
+                            >
+                                <span style={sectionTitleStyle}>Gem type</span>
+                                <span style={chevronStyle}>
+                                    {expandedSections.gemType ? "−" : "+"}
+                                </span>
+                            </button>
+
+                            {expandedSections.gemType && (
+                                <div style={sectionContentStyle}>
+                                    {gemTypeOptions.map((opt) => (
+                                        <label key={opt.label} style={checkboxLabelStyle}>
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedGemTypes.includes(opt.label)}
+                                                onChange={() =>
+                                                    setSelectedGemTypes((p) => toggle(p, opt.label))
+                                                }
+                                                style={checkboxInputStyle}
+                                            />
+                                            <span style={checkboxTextStyle}>{opt.label}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Location */}
+                        {locations.length > 0 && (
+                            <div style={drawerSectionStyle}>
+                                <button
+                                    onClick={() => toggleSection("location")}
+                                    style={sectionHeaderStyle}
+                                    type="button"
+                                >
+                                    <span style={sectionTitleStyle}>Location</span>
+                                    <span style={chevronStyle}>
+                                        {expandedSections.location ? "−" : "+"}
+                                    </span>
+                                </button>
+
+                                {expandedSections.location && (
+                                    <div style={sectionContentStyle}>
+                                        {locations.map((loc) => (
+                                            <label key={loc} style={checkboxLabelStyle}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedLocations.includes(loc)}
+                                                    onChange={() =>
+                                                        setSelectedLocations((a) => toggle(a, loc))
+                                                    }
+                                                    style={checkboxInputStyle}
+                                                />
+                                                <span style={checkboxTextStyle}>{loc}</span>
+                                                <span style={countStyle}>
+                                                    ({countsByLocation.get(loc) || 0})
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Carat Weight */}
+                        <div style={drawerSectionStyle}>
+                            <button
+                                onClick={() => toggleSection("carat")}
+                                style={sectionHeaderStyle}
+                                type="button"
+                            >
+                                <span style={sectionTitleStyle}>Weight</span>
+                                <span style={chevronStyle}>
+                                    {expandedSections.carat ? "−" : "+"}
+                                </span>
+                            </button>
+
+                            {expandedSections.carat && (
+                                <div style={sectionContentStyle}>
+                                    <div style={rangeLabelsStyle}>
+                                        <div style={rangeLabelTextStyle}>Minimum</div>
+                                        <div style={rangeLabelValueStyle}>{caratRange[0]} ct</div>
+                                    </div>
+
+                                    <div style={sliderContainerStyle}>
+                                        <div style={sliderTicksStyle}>
+                                            {Array.from(
+                                                { length: (caratMinMax.max - caratMinMax.min) / 0.5 + 1 },
+                                                (_, i) => caratMinMax.min + i * 0.5
+                                            ).map((value) => (
+                                                <div key={value} style={sliderTickStyle}>
+                                                    <div style={sliderTickMarkStyle} />
+                                                    {value % 1 === 0 && (
+                                                        <div style={sliderTickLabelStyle}>{value}</div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <input
+                                            type="range"
+                                            min={caratMinMax.min}
+                                            max={caratMinMax.max}
+                                            step={0.5}
+                                            value={caratRange[0]}
+                                            onChange={(e) =>
+                                                setCaratRange(([a, b]) => [
+                                                    Math.min(Number(e.target.value), b),
+                                                    b,
+                                                ])
+                                            }
+                                            style={sliderStyle}
+                                            className="range-slider"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <button
+                            type="button"
+                            style={drawerApplyBtnStyle}
+                            onClick={() => setMobileFiltersOpen(false)}
+                        >
+                            View Results
+                        </button>
+                    </div>
+                </>
+            )}
+
+            {/* Desktop layout (unchanged sidebar) */}
             <div style={wrapStyle} className="stones-filter-wrap">
                 <aside style={sidebarStyle} className="filter-sidebar">
                     <div style={sidebarHeaderStyle}>
@@ -232,7 +530,9 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                             type="button"
                         >
                             <span style={sectionTitleStyle}>Gem type</span>
-                            <span style={chevronStyle}>{expandedSections.gemType ? "−" : "+"}</span>
+                            <span style={chevronStyle}>
+                                {expandedSections.gemType ? "−" : "+"}
+                            </span>
                         </button>
 
                         {expandedSections.gemType && (
@@ -299,7 +599,9 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
                             type="button"
                         >
                             <span style={sectionTitleStyle}>Weight</span>
-                            <span style={chevronStyle}>{expandedSections.carat ? "−" : "+"}</span>
+                            <span style={chevronStyle}>
+                                {expandedSections.carat ? "−" : "+"}
+                            </span>
                         </button>
 
                         {expandedSections.carat && (
@@ -423,7 +725,97 @@ export default function StoneFilters({ stones }: { stones: StoneListItem[] }) {
     );
 }
 
-/* ------------------ STYLES ------------------ */
+/* ------------------ MOBILE BAR + DRAWER STYLES ------------------ */
+
+const mobileFilterBarStyle: React.CSSProperties = {
+    display: "flex",
+    gap: 12,
+    alignItems: "center",
+    justifyContent: "flex-start",
+    marginBottom: 22,
+};
+
+const mobileFilterBtnStyle: React.CSSProperties = {
+    border: "1px solid #0a0a0a",
+    background: "#0a0a0a",
+    color: "#F9F8F6",
+    padding: "16px 28px",      // wider horizontally + slightly taller
+    fontSize: 12,
+    letterSpacing: "0.18em",  // more luxury spacing
+    textTransform: "uppercase",
+    cursor: "pointer",
+    fontFamily: "inherit",
+    minWidth: 160,             // forces width even on short text
+    textAlign: "center",
+};
+
+const mobileClearBtnStyle: React.CSSProperties = {
+    border: "none",
+    background: "transparent",
+    padding: "14px 6px",
+    fontSize: 12,
+    letterSpacing: "0.10em",
+    textTransform: "uppercase",
+    cursor: "pointer",
+    color: "rgba(10,10,10,0.55)",
+    fontFamily: "inherit",
+};
+
+const drawerHeaderStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+};
+
+const drawerTitleStyle: React.CSSProperties = {
+    fontSize: 18,
+    fontWeight: 400,
+    letterSpacing: "-0.01em",
+    color: "#0a0a0a",
+};
+
+const drawerCloseBtnStyle: React.CSSProperties = {
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    fontSize: 20,
+    lineHeight: 1,
+    padding: 8,
+    color: "rgba(10,10,10,0.60)",
+};
+
+const drawerClearAllStyle: React.CSSProperties = {
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    fontSize: 11,
+    letterSpacing: "0.06em",
+    textTransform: "uppercase",
+    color: "rgba(10, 10, 10, 0.48)",
+    padding: "6px 0 18px",
+};
+
+const drawerSectionStyle: React.CSSProperties = {
+    borderBottom: "1px solid rgba(10, 10, 10, 0.08)",
+    paddingBottom: 18,
+    marginBottom: 18,
+};
+
+const drawerApplyBtnStyle: React.CSSProperties = {
+    marginTop: 12,
+    width: "100%",
+    border: "1px solid rgba(10,10,10,0.16)",
+    background: "#ffffff",
+    padding: "14px 16px",
+    fontSize: 12,
+    letterSpacing: "0.14em",
+    textTransform: "uppercase",
+    cursor: "pointer",
+    fontFamily: "inherit",
+};
+
+/* ------------------ ORIGINAL STYLES ------------------ */
 
 const wrapStyle: React.CSSProperties = {
     display: "grid",
