@@ -6,11 +6,15 @@ import { submitContact } from "./actions";
 export default async function ContactPage({
                                               searchParams,
                                           }: {
-    searchParams?: Promise<{ sent?: string }>;
+    searchParams?: Promise<{ sent?: string; v?: string }>;
 }) {
     const sp = (await searchParams) ?? {};
     const sent = sp.sent === "1";
     const failed = sp.sent === "0";
+    const v = sp.v; // "1" validation, "2" send/config
+
+    const validationFailed = failed && v === "1";
+    const sendFailed = failed && v === "2";
 
     return (
         <div style={pageStyle}>
@@ -44,7 +48,7 @@ export default async function ContactPage({
                 </div>
             </section>
 
-            {/* FORM (client component handles animation + submit) */}
+            {/* FORM */}
             <main style={mainStyle}>
                 <div style={cardStyle}>
                     <div style={cardHeaderStyle}>
@@ -61,9 +65,17 @@ export default async function ContactPage({
                         </div>
                     )}
 
-                    {failed && (
+                    {validationFailed && (
+                        <div style={errorStyle}>Please complete the required fields and try again.</div>
+                    )}
+
+                    {sendFailed && (
                         <div style={errorStyle}>
-                            Please complete the required fields and try again.
+                            We couldn’t send your inquiry right now. Please email us directly at{" "}
+                            <a href="mailto:ceylongemcompany.inquiries@gmail.com" style={errorLinkStyle}>
+                                ceylongemcompany.inquiries@gmail.com
+                            </a>
+                            .
                         </div>
                     )}
 
@@ -117,14 +129,14 @@ const imageContainerStyle: React.CSSProperties = {
 
 const bannerImageStyle: React.CSSProperties = {
     objectFit: "cover",
-    objectPosition: "center 60%",
+    objectPosition: "center 58%",
 };
 
 const heroOverlayStyle: React.CSSProperties = {
     position: "absolute",
     inset: 0,
     background:
-        "linear-gradient(120deg, rgba(10,30,24,0.35), rgba(90,70,25,0.20), rgba(20,18,14,0.30))",
+        "linear-gradient(120deg, rgba(10,30,24,0.34), rgba(90,70,25,0.18), rgba(20,18,14,0.30))",
 };
 
 const imageFadeStyle: React.CSSProperties = {
@@ -132,14 +144,14 @@ const imageFadeStyle: React.CSSProperties = {
     left: 0,
     right: 0,
     bottom: 0,
-    height: "22%",
+    height: "14%",
     background:
         "linear-gradient(to bottom, rgba(249,248,246,0), rgba(249,248,246,0.95))",
 };
 
 const mastheadWrapStyle: React.CSSProperties = {
     backgroundColor: "#F9F8F6",
-    padding: "46px 5vw 22px",
+    padding: "26px 5vw 10px",
 };
 
 const mastheadInnerStyle: React.CSSProperties = {
@@ -150,85 +162,105 @@ const mastheadInnerStyle: React.CSSProperties = {
 
 const mastheadRuleStyle: React.CSSProperties = {
     height: 1,
-    width: "min(720px, 92%)",
+    width: "min(760px, 94%)",
     margin: "0 auto",
     backgroundColor: "rgba(26,26,26,0.12)",
 };
 
 const mastheadTopKickerStyle: React.CSSProperties = {
-    fontSize: 10,
-    letterSpacing: "0.34em",
+    fontSize: 11,
+    letterSpacing: "0.36em",
     textTransform: "uppercase",
-    color: "rgba(26,26,26,0.55)",
-    marginTop: 22,
+    color: "rgba(26,26,26,0.56)",
+    marginTop: 18,
 };
 
 const mastheadTitleStyle: React.CSSProperties = {
-    fontSize: "clamp(32px, 8vw, 54px)",
+    fontSize: "clamp(34px, 7.4vw, 56px)",
     fontWeight: 400,
-    letterSpacing: "0.08em",
-    margin: "16px 0 12px",
+    letterSpacing: "0.09em",
+    margin: "14px 0 12px",
+    color: "#0d0d0d", // black
 };
 
+
 const mastheadSubStyle: React.CSSProperties = {
-    fontSize: 13,
+    fontSize: 14,
     letterSpacing: "0.18em",
     textTransform: "uppercase",
-    color: "rgba(26,26,26,0.55)",
+    color: "rgba(26,26,26,0.56)",
     lineHeight: 1.7,
+    marginBottom: 6,
 };
 
 const mainStyle: React.CSSProperties = {
-    maxWidth: 980,
+    maxWidth: 1020,
     margin: "0 auto",
-    padding: "56px 5vw 120px",
+    padding: "18px 5vw 110px",
+    marginTop: -18,
 };
 
 const cardStyle: React.CSSProperties = {
-    background: "rgba(255,255,255,0.85)",
-    borderRadius: 20,
-    padding: "46px min(4vw, 54px)",
-    border: "1px solid rgba(26,26,26,0.1)",
+    background:
+        "linear-gradient(180deg, rgba(255,255,255,0.90) 0%, rgba(255,255,255,0.84) 100%)",
+    borderRadius: 22,
+    padding: "52px min(4vw, 58px)",
+    border: "1px solid rgba(26,26,26,0.10)",
     boxShadow: "0 28px 80px rgba(0,0,0,0.07)",
 };
 
-const cardHeaderStyle: React.CSSProperties = { marginBottom: 28 };
+const cardHeaderStyle: React.CSSProperties = { marginBottom: 30 };
 
 const sectionKickerStyle: React.CSSProperties = {
-    fontSize: 10,
-    letterSpacing: "0.3em",
+    fontSize: 11,
+    letterSpacing: "0.32em",
     textTransform: "uppercase",
-    color: "rgba(26,26,26,0.55)",
+    color: "rgba(26,26,26,0.56)",
     marginBottom: 12,
 };
 
 const h2Style: React.CSSProperties = {
-    fontSize: "clamp(26px, 6vw, 40px)",
+    fontSize: "clamp(30px, 5.2vw, 44px)",
     fontWeight: 400,
     margin: 0,
+    letterSpacing: "-0.01em",
+    color: "#0d0d0d", // black
 };
+
 
 const subtitleStyle: React.CSSProperties = {
     marginTop: 12,
-    fontSize: 16,
-    lineHeight: 1.7,
-    color: "rgba(26,26,26,0.65)",
+    fontSize: 18,
+    lineHeight: 1.75,
+    color: "rgba(26,26,26,0.68)",
+    maxWidth: 720,
 };
 
 const successStyle: React.CSSProperties = {
     marginBottom: 18,
-    padding: "14px 16px",
-    borderRadius: 12,
-    background: "rgba(230,245,235,0.9)",
-    border: "1px solid rgba(40,120,70,0.3)",
+    padding: "16px 18px",
+    borderRadius: 14,
+    background: "rgba(230,245,235,0.92)",
+    border: "1px solid rgba(40,120,70,0.30)",
+    fontSize: 16,
+    lineHeight: 1.6,
 };
 
 const errorStyle: React.CSSProperties = {
     marginBottom: 18,
-    padding: "14px 16px",
-    borderRadius: 12,
-    background: "rgba(255,230,230,0.9)",
-    border: "1px solid rgba(120,20,20,0.3)",
+    padding: "16px 18px",
+    borderRadius: 14,
+    background: "rgba(255,230,230,0.92)",
+    border: "1px solid rgba(120,20,20,0.30)",
+    fontSize: 16,
+    lineHeight: 1.6,
+};
+
+const errorLinkStyle: React.CSSProperties = {
+    color: "rgba(26,26,26,0.92)",
+    textDecoration: "none",
+    borderBottom: "1px solid rgba(26,26,26,0.18)",
+    paddingBottom: 2,
 };
 
 const formStyle: React.CSSProperties = {
@@ -240,7 +272,7 @@ const formStyle: React.CSSProperties = {
 const grid2Style: React.CSSProperties = {
     display: "grid",
     gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    gap: 18,
+    gap: 20,
 };
 
 const fieldStyle: React.CSSProperties = {
@@ -251,19 +283,20 @@ const fieldStyle: React.CSSProperties = {
 };
 
 const labelStyle: React.CSSProperties = {
-    fontSize: 10,
-    letterSpacing: "0.18em",
+    fontSize: 11,
+    letterSpacing: "0.20em",
     textTransform: "uppercase",
-    color: "rgba(26,26,26,0.58)",
+    color: "rgba(26,26,26,0.60)",
 };
 
 const inputStyle: React.CSSProperties = {
-    padding: "14px 16px",
-    fontSize: 16,
-    borderRadius: 12,
+    padding: "16px 18px",
+    fontSize: 17,
+    borderRadius: 14,
     border: "1px solid rgba(26,26,26,0.16)",
     width: "100%",
     boxSizing: "border-box",
+    background: "rgba(255,255,255,0.92)",
 };
 
 const selectStyle: React.CSSProperties = { ...inputStyle, cursor: "pointer" };
@@ -274,7 +307,7 @@ const textareaStyle: React.CSSProperties = {
 };
 
 const buttonRowStyle: React.CSSProperties = {
-    marginTop: 10,
+    marginTop: 14,
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
@@ -285,35 +318,36 @@ const buttonRowStyle: React.CSSProperties = {
 const buttonStyle: React.CSSProperties = {
     background: "#0d0d0d",
     color: "#fff",
-    padding: "14px 20px",
-    borderRadius: 12,
+    padding: "16px 24px",
+    borderRadius: 14,
     border: "1px solid rgba(0,0,0,0.25)",
     textTransform: "uppercase",
-    letterSpacing: "0.16em",
-    fontSize: 12,
+    letterSpacing: "0.18em",
+    fontSize: 13,
     cursor: "pointer",
 };
 
 const noteStyle: React.CSSProperties = {
     fontSize: 12,
     textTransform: "uppercase",
-    letterSpacing: "0.1em",
-    color: "rgba(26,26,26,0.5)",
+    letterSpacing: "0.11em",
+    color: "rgba(26,26,26,0.52)",
 };
 
 const directBoxStyle: React.CSSProperties = {
-    padding: "14px 16px",
-    borderRadius: 12,
+    padding: "16px 18px",
+    borderRadius: 14,
     border: "1px solid rgba(26,26,26,0.14)",
     display: "flex",
     flexDirection: "column",
     gap: 10,
     minWidth: 0,
+    background: "rgba(255,255,255,0.65)",
 };
 
 const directLinkStyle: React.CSSProperties = {
-    fontSize: 14,
-    color: "rgba(26,26,26,0.88)",
+    fontSize: 15,
+    color: "rgba(26,26,26,0.90)",
     textDecoration: "none",
     borderBottom: "1px solid rgba(26,26,26,0.14)",
     paddingBottom: 3,
