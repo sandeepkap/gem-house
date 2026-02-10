@@ -11,6 +11,8 @@ export default function Navigation() {
     const pathname = usePathname();
     const router = useRouter();
 
+    const isHome = pathname === "/";
+
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 50);
         window.addEventListener("scroll", handleScroll, { passive: true });
@@ -19,11 +21,11 @@ export default function Navigation() {
 
     const closeMobileMenu = () => setMobileMenuOpen(false);
 
-    const goToSection = (id: string) => async (e: React.MouseEvent) => {
+    const goToSection = (id: string) => (e: React.MouseEvent) => {
         e.preventDefault();
         closeMobileMenu();
 
-        if (pathname === "/") {
+        if (isHome) {
             const el = document.getElementById(id);
             if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
             return;
@@ -36,12 +38,18 @@ export default function Navigation() {
         e.preventDefault();
         closeMobileMenu();
 
-        if (pathname === "/") {
+        if (isHome) {
             window.scrollTo({ top: 0, behavior: "smooth" });
             return;
         }
 
         router.push("/");
+    };
+
+    const goContactPage = (e: React.MouseEvent) => {
+        e.preventDefault();
+        closeMobileMenu();
+        router.push("/contact");
     };
 
     return (
@@ -68,12 +76,21 @@ export default function Navigation() {
                         />
                     </Link>
 
-                    {/* CENTER: Desktop links */}
+                    {/* CENTER: Desktop links (ALWAYS present) */}
                     <div style={navLinksStyle} className="nav-links-desktop">
-                        <a href="/#collection" onClick={goToSection("collection")} style={navLinkStyle}>
+                        <a
+                            href="/#collection"
+                            onClick={goToSection("collection")}
+                            style={navLinkStyle}
+                        >
                             Collection
                         </a>
-                        <a href="/#contact" onClick={goToSection("contact")} style={navLinkStyle}>
+
+                        <a
+                            href="/contact"
+                            onClick={goContactPage}
+                            style={navLinkStyle}
+                        >
                             Contact
                         </a>
                     </div>
@@ -134,7 +151,7 @@ export default function Navigation() {
                 `}</style>
             </nav>
 
-            {/* MOBILE MENU */}
+            {/* MOBILE MENU (same links as desktop) */}
             {mobileMenuOpen && (
                 <div style={mobileMenuOverlayStyle} onClick={closeMobileMenu}>
                     <div
@@ -148,9 +165,10 @@ export default function Navigation() {
                         >
                             Collection
                         </a>
+
                         <a
-                            href="/#contact"
-                            onClick={goToSection("contact")}
+                            href="/contact"
+                            onClick={goContactPage}
                             style={mobileMenuLinkStyle}
                         >
                             Contact
@@ -189,13 +207,13 @@ const logoLinkStyle: React.CSSProperties = {
 };
 
 const navLogoStyle: React.CSSProperties = {
-    height: 52,                 // visually larger
+    height: 52,
     width: "auto",
     objectFit: "contain",
     opacity: 0.95,
     filter: "drop-shadow(0 6px 18px rgba(0,0,0,0.35))",
-    marginTop: -8,              // ⬅️ pull up
-    marginBottom: -8,           // ⬅️ pull down
+    marginTop: -8,
+    marginBottom: -8,
 };
 
 const navLinksStyle: React.CSSProperties = {
