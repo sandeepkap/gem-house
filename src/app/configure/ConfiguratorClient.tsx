@@ -19,18 +19,18 @@ type RingShape = {
 };
 
 const RING_SHAPES: RingShape[] = [
-    { id: "round",    label: "Round",       images: { silver: "/rings/round.png",    yellow_gold: "/rings/gold/round.png",    white_gold: "/rings/round.png"    }, description: "Maximum brilliance from 58 precisely angled facets." },
-    { id: "oval",     label: "Oval",        images: { silver: "/rings/oval.png",     yellow_gold: "/rings/gold/oval.png",     white_gold: "/rings/oval.png"     }, description: "Elongated elegance — appears larger than its carat weight." },
-    { id: "cushion",  label: "Cushion",     images: { silver: "/rings/cushion.png",  yellow_gold: "/rings/gold/cushion.png",  white_gold: "/rings/cushion.png"  }, description: "Soft corners with large facets — romantic and timeless." },
-    { id: "pear",     label: "Pear",        images: { silver: "/rings/pear.png",     yellow_gold: "/rings/gold/pear.png",     white_gold: "/rings/pear.png"     }, description: "A teardrop silhouette that elongates the finger." },
-    { id: "emerald",  label: "Emerald Cut", images: { silver: "/rings/emerald.png",  yellow_gold: "/rings/gold/emerald.png",  white_gold: "/rings/emerald.png"  }, description: "Step-cut facets create a dramatic hall-of-mirrors effect." },
-    { id: "princess", label: "Princess",    images: { silver: "/rings/princess.png", yellow_gold: "/rings/gold/princess.png", white_gold: "/rings/princess.png" }, description: "Square with exceptional brilliance." },
-    { id: "radiant",  label: "Radiant",     images: { silver: "/rings/radiant.png",  yellow_gold: "/rings/gold/radiant.png",  white_gold: "/rings/radiant.png"  }, description: "Emerald cut elegance with round-cut brilliance." },
-    { id: "asscher",  label: "Asscher",     images: { silver: "/rings/asscher.png",  yellow_gold: "/rings/gold/asscher.png",  white_gold: "/rings/asscher.png"  }, description: "Art Deco octagonal step cut — deeply geometric." },
-    { id: "heart",    label: "Heart",       images: { silver: "/rings/heart.png",    yellow_gold: "/rings/gold/heart.png",    white_gold: "/rings/heart.png"    }, description: "The ultimate romantic symbol." },
-    { id: "marquise", label: "Marquise",    images: { silver: "/rings/marquise.png", yellow_gold: "/rings/gold/marquise.png", white_gold: "/rings/marquise.png" }, description: "Football-shaped — the most elongating cut." },
-    { id: "trillion", label: "Trillion",    images: { silver: "/rings/trillion.png", yellow_gold: "/rings/gold/trillion.png", white_gold: "/rings/trillion.png" }, description: "Bold triangular shape — modern and architectural." },
-    { id: "baguette", label: "Baguette",    images: { silver: "/rings/baguette.png", yellow_gold: "/rings/gold/baguette.png", white_gold: "/rings/baguette.png" }, description: "Sleek rectangular step cut." },
+    { id: "round",    label: "Round",       images: { silver: "/rings/Round.png",    yellow_gold: "/rings/gold/Round.png",    white_gold: "/rings/Round.png"    }, description: "Maximum brilliance from 58 precisely angled facets." },
+    { id: "oval",     label: "Oval",        images: { silver: "/rings/Oval.png",     yellow_gold: "/rings/gold/Oval.png",     white_gold: "/rings/Oval.png"     }, description: "Elongated elegance — appears larger than its carat weight." },
+    { id: "cushion",  label: "Cushion",     images: { silver: "/rings/Cushion.png",  yellow_gold: "/rings/gold/Cushion.png",  white_gold: "/rings/Cushion.png"  }, description: "Soft corners with large facets — romantic and timeless." },
+    { id: "pear",     label: "Pear",        images: { silver: "/rings/Pear.png",     yellow_gold: "/rings/gold/Pear.png",     white_gold: "/rings/Pear.png"     }, description: "A teardrop silhouette that elongates the finger." },
+    { id: "emerald",  label: "Emerald Cut", images: { silver: "/rings/Emerald.png",  yellow_gold: "/rings/gold/Emerald.png",  white_gold: "/rings/Emerald.png"  }, description: "Step-cut facets create a dramatic hall-of-mirrors effect." },
+    { id: "princess", label: "Princess",    images: { silver: "/rings/Princess.png", yellow_gold: "/rings/gold/Princess.png", white_gold: "/rings/Princess.png" }, description: "Square with exceptional brilliance." },
+    { id: "radiant",  label: "Radiant",     images: { silver: "/rings/Radiant.png",  yellow_gold: "/rings/gold/Radiant.png",  white_gold: "/rings/Radiant.png"  }, description: "Emerald cut elegance with round-cut brilliance." },
+    { id: "asscher",  label: "Asscher",     images: { silver: "/rings/Asscher.png",  yellow_gold: "/rings/gold/Asscher.png",  white_gold: "/rings/Asscher.png"  }, description: "Art Deco octagonal step cut — deeply geometric." },
+    { id: "heart",    label: "Heart",       images: { silver: "/rings/Heart.png",    yellow_gold: "/rings/gold/Heart.png",    white_gold: "/rings/Heart.png"    }, description: "The ultimate romantic symbol." },
+    { id: "marquise", label: "Marquise",    images: { silver: "/rings/Marquise.png", yellow_gold: "/rings/gold/Marquise.png", white_gold: "/rings/Marquise.png" }, description: "Football-shaped — the most elongating cut." },
+    { id: "trillion", label: "Trillion",    images: { silver: "/rings/Trillion.png", yellow_gold: "/rings/gold/Trillion.png", white_gold: "/rings/Trillion.png" }, description: "Bold triangular shape — modern and architectural." },
+    { id: "baguette", label: "Baguette",    images: { silver: "/rings/Baguette.png", yellow_gold: "/rings/gold/Baguette.png", white_gold: "/rings/Baguette.png" }, description: "Sleek rectangular step cut." },
 ];
 
 const F  = `"Crimson Pro","Cormorant Garamond","EB Garamond",Georgia,serif`;
