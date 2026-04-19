@@ -1,813 +1,166 @@
+/* ═══════════════════════════════════════════════════
+   CEYLON GEM CO. — EDITORIAL REDESIGN
+   Times New Roman display + Geist UI
+═══════════════════════════════════════════════════ */
+
 :root {
-  /* Dark section colors (Collection) */
-  --bg-dark: #0a0a0a;
-  --fg-dark: #fafafa;
-  --muted-dark: rgba(250, 250, 250, 0.56);
-  --line-dark: rgba(250, 250, 250, 0.12);
+  --paper: #F4F1EB;
+  --paper-pure: #FFFFFF;
+  --ink: #000000;
 
-  /* Light section colors (Hero, Contact) */
-  --bg-light: #ffffff;
-  --fg-light: #0a0a0a;
-  --muted-light: rgba(10, 10, 10, 0.56);
-  --line-light: rgba(10, 10, 10, 0.08);
+  --hairline: rgba(0,0,0,0.12);
+  --hairline-strong: rgba(0,0,0,0.25);
 
-  /* Legacy vars for compatibility */
-  --bg: #0a0a0a;
-  --fg: #fafafa;
-  --muted: rgba(250, 250, 250, 0.56);
-  --line: rgba(250, 250, 250, 0.12);
+  --serif: "Times New Roman", Times, serif;
+  --sans: "Geist", "Inter", "Helvetica Neue", Arial, sans-serif;
+  --mono: "Geist Mono", "JetBrains Mono", ui-monospace, monospace;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* Keyframe Animations */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes subtleShift {
-  0%, 100% {
-    transform: scale(1) translate(0, 0);
-  }
-  33% {
-    transform: scale(1.05) translate(-2%, 2%);
-  }
-  66% {
-    transform: scale(1.03) translate(2%, -1%);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%) rotate(45deg);
-  }
-  100% {
-    transform: translateX(200%) rotate(45deg);
-  }
-}
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-  background: var(--bg-dark);
-  color: var(--fg-dark);
-  font-family: "Crimson Pro", "Cormorant Garamond", "EB Garamond", Georgia, "Times New Roman", Times, serif;
+html, body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern", "liga", "onum";
+  scroll-behavior: smooth;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
+body { overflow-x: hidden; }
 
-a:hover {
-  opacity: 0.65;
-}
+a { color: inherit; text-decoration: none; }
 
-.container {
-  width: min(1400px, calc(100vw - 10vw));
-  margin: 0 auto;
-}
+img, video { max-width: 100%; display: block; }
 
-@media (max-width: 768px) {
-  .container {
-    width: calc(100vw - 40px);
-  }
-}
+::selection { background: #000; color: var(--paper); }
 
-/* Typography utilities */
-.small {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 10px;
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
-  color: var(--muted-dark);
-}
+/* ─── Editorial primitives ─── */
 
-.small-light {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 10px;
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
-  color: var(--muted-light);
-}
-
-.divider {
+.cg-rule {
   height: 1px;
-  background: var(--line-dark);
-  margin: 80px 0;
+  background: #000;
+  width: 100%;
 }
 
-.divider-light {
+.cg-hairline {
   height: 1px;
-  background: var(--line-light);
-  margin: 80px 0;
+  background: var(--hairline);
+  width: 100%;
 }
 
-/* Headings */
-h1 {
-  font-size: clamp(48px, 7vw, 82px);
-  line-height: 1.08;
+.cg-label {
+  font-family: var(--sans);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  font-weight: 400;
+  color: #000;
+}
+
+.cg-number {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.cg-display {
+  font-family: var(--serif);
   font-weight: 400;
   letter-spacing: -0.02em;
-  margin: 0 0 32px;
-  color: var(--fg-dark);
+  line-height: 0.95;
+  color: #000;
 }
 
-h2 {
-  font-size: clamp(32px, 4vw, 46px);
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  margin: 0 0 48px;
-  color: var(--fg-dark);
+.cg-display em,
+.cg-italic {
+  font-style: italic;
 }
 
-h2.light {
-  color: var(--fg-light);
-}
+/* ─── Reveal ─── */
 
-p {
-  margin: 0;
-  font-size: clamp(16px, 1.8vw, 18px);
-  line-height: 1.7;
-  color: var(--muted-dark);
-  font-weight: 300;
+.cg-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s var(--ease), transform 1s var(--ease);
+  will-change: opacity, transform;
 }
+.cg-reveal.in { opacity: 1; transform: translateY(0); }
 
-p.light {
-  color: var(--muted-light);
-}
+/* ─── Filter drawer (mobile) ─── */
 
-/* Stone Grid */
-.stonesGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 48px;
-}
-
-@media (max-width: 1200px) {
-  .stonesGrid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 40px;
-  }
-}
-
-@media (max-width: 768px) {
-  .stonesGrid {
-    grid-template-columns: 1fr;
-    gap: 32px;
-  }
-}
-
-/* Stone Cards */
-.stoneCard {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-  opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.stoneCard::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(
-          90deg,
-          transparent,
-          rgba(255, 255, 255, 0.1),
-          transparent
-  );
-  z-index: 1;
+.filters-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4);
+  opacity: 0;
   pointer-events: none;
+  transition: opacity 220ms ease;
+  z-index: 9998;
+}
+.filters-overlay.open { opacity: 1; pointer-events: auto; }
+
+.filters-drawer {
+  position: fixed; top: 0; left: 0;
+  height: 100vh;
+  width: min(380px, 88vw);
+  background: var(--paper);
+  border-right: 1px solid var(--hairline);
+  transform: translateX(-102%);
+  transition: transform 260ms var(--ease);
+  z-index: 9999;
+  overflow-y: auto;
+  padding: 28px 22px;
+  font-family: var(--serif);
+}
+.filters-drawer.open { transform: translateX(0); }
+
+/* ─── Forms ─── */
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(0,0,0,0.3);
+  font-family: var(--serif);
+  font-style: italic;
+}
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #000 !important;
+  outline: none;
 }
 
-.stoneCard:hover::before {
-  animation: shimmer 1.2s ease-in-out;
+/* ─── Accessibility ─── */
+
+@media (prefers-reduced-motion: reduce) {
+  .cg-reveal, .cg-reveal.in, html {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
 }
 
-.stoneCard:hover {
-  opacity: 0.85;
-  transform: translateY(-4px);
-}
-
-.stoneHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 16px;
-  margin-bottom: 8px;
-}
-
-.stoneName {
-  font-size: 19px;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  line-height: 1.3;
-}
-
-.stoneCategory {
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--muted-light);
-  white-space: nowrap;
-}
-
-.stoneImageFrame {
-  border: 1px solid var(--line-light);
-  overflow: hidden;
-  aspect-ratio: 1 / 1;
-  background-color: rgba(10, 10, 10, 0.02);
-  margin-bottom: 24px;
-}
-
-.stoneImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.stoneMeta {
-  font-size: 14px;
-  color: var(--muted-light);
-  font-weight: 300;
-  letter-spacing: 0.01em;
-}
-
-/* Background - subtle gradient for the dark section */
-body {
-  background: var(--bg-dark);
-}
-
-/* Section-specific backgrounds */
-.section-dark {
-  background: var(--bg-dark);
-}
-
-.section-light {
-  background: radial-gradient(ellipse 1200px 800px at 50% 0%, rgba(10, 10, 10, 0.03), transparent 70%),
-  #ffffff;
-}
-
-/* Contact section styling */
-.contact-section {
-  background-color: var(--bg-dark);
-  color: var(--fg-dark);
-}
-
-.contact-kicker {
-  font-size: 10px;
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
-  color: rgba(250, 250, 250, 0.48);
-  margin-bottom: 12px;
-}
-
-.contact-heading {
-  font-size: clamp(32px, 4vw, 46px);
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  margin-bottom: 48px;
-  color: #fafafa;
-}
-
-.contact-link {
-  font-size: clamp(20px, 2.8vw, 32px);
-  color: #fafafa;
-  text-decoration: none;
-  letter-spacing: -0.01em;
-  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  display: inline-block;
-}
-
-.contact-link:hover {
-  opacity: 0.65;
-}
-
-.contact-detail {
-  font-size: 18px;
-  color: rgba(250, 250, 250, 0.56);
-  font-weight: 300;
-}
-
-/* Footer */
-.footer {
-  font-size: 11px;
-  color: rgba(250, 250, 250, 0.42);
-  letter-spacing: 0.02em;
-  text-align: center;
-  padding-top: 48px;
-  border-top: 1px solid rgba(250, 250, 250, 0.08);
-  background-color: var(--bg-dark);
-}
-
-/* Scroll indicator */
-.scroll-indicator {
-  position: absolute;
-  bottom: 60px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.scroll-line {
-  width: 1px;
-  height: 48px;
-  background: linear-gradient(to bottom, rgba(250, 250, 250, 0) 0%, rgba(250, 250, 250, 0.3) 100%);
-}
-
-.scroll-text {
-  font-size: 10px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: rgba(250, 250, 250, 0.48);
-}
-
-/* Navigation styles */
-.nav-link:hover {
-  color: #fafafa !important;
-}
-
-.inquiry-link:hover {
-  background-color: rgba(250, 250, 250, 0.05);
-  border-color: rgba(250, 250, 250, 0.4);
-}
-
-.company-name-link:hover .company-name {
-  color: #fafafa !important;
-}
-
-/* Partners section */
-.partner-card-link:hover .partner-card {
-  transform: translateY(-4px);
-  border-color: rgba(26, 26, 26, 0.16);
-  box-shadow: 0 8px 24px rgba(26, 26, 26, 0.08);
-}
-
-.partner-card-link:hover .partner-logo img {
-  filter: grayscale(0%);
-  opacity: 1;
-}
-
-.partner-card {
-  cursor: pointer;
-}
-
-.partner-card-link {
-  text-decoration: none;
-  display: block;
-}
+/* ═══════════════════════════════════════════════════
+   MOBILE — global scaling
+   Per-page layout changes handled in page files.
+═══════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
-  .partners-grid {
-    grid-template-columns: 1fr !important;
-    gap: 32px !important;
+  /* Prevent ultra-wide letter-spacing taglines from overflowing */
+  h1, h2, h3 {
+    word-break: normal;
+    overflow-wrap: break-word;
   }
 
-  .partner-card {
-    padding: 32px 20px !important;
-  }
+  /* Softer letter-spacing on tiny meta labels */
+  .cg-label { letter-spacing: 0.22em; }
 }
 
-/* Mobile navigation */
-@media (max-width: 900px) {
-  .nav-links-desktop,
-  .nav-right-desktop {
-    display: none !important;
-  }
-
-  .mobile-menu-button {
-    display: flex !important;
-    justify-self: end;
-  }
-
-  .main-nav .logo {
-    justify-self: start;
-  }
-}
-
-@media (min-width: 901px) {
-  .mobile-menu-button {
-    display: none !important;
-  }
-}
-
-/* Hero section background image responsive */
-.hero-image-background {
-  background-size: cover !important;
-  background-position: center !important;
-}
-
-@media (max-width: 768px) {
-  .hero-image-background {
-    background-size: cover !important;
-    background-position: center top !important;
-  }
-}
-
-@media (orientation: landscape) and (max-width: 1024px) {
-  .hero-image-background {
-    background-size: cover !important;
-    background-position: center center !important;
-  }
-}
-
-/* Responsive typography */
-@media (max-width: 768px) {
-  h1 {
-    font-size: 42px !important;
-    margin-bottom: 24px !important;
-  }
-
-  h2 {
-    font-size: 32px !important;
-    margin-bottom: 32px !important;
-  }
-
-  p {
-    font-size: 16px !important;
-  }
-
-  .contact-link {
-    font-size: 24px !important;
-  }
-
-  .contact-detail {
-    font-size: 16px !important;
-  }
-}
-
-@media (max-width: 480px) {
-  h1 {
-    font-size: 36px !important;
-    line-height: 1.1 !important;
-  }
-
-  h2 {
-    font-size: 28px !important;
-  }
-
-  body {
-    font-size: 15px !important;
-    overflow-x: hidden;
-  }
-
-  /* Hero section mobile fixes */
-  section[style*="minHeight: 100vh"] {
-    padding: 0 20px !important;
-  }
-
-  /* Collection section mobile fixes */
-  section[style*="padding: 160px"] {
-    padding: 80px 20px 100px 20px !important;
-  }
-
-  /* Contact section mobile fixes */
-  section[style*="backgroundColor: #0a0a0a"] {
-    padding: 80px 20px 60px 20px !important;
-  }
-
-  /* Prevent horizontal overflow */
-  * {
-    max-width: 100%;
-  }
-
-  img {
-    max-width: 100%;
-    height: auto;
-  }
-}
-
-/* Collection layout with filters - responsive */
-@media (max-width: 1200px) {
-  .collection-layout-grid {
-    grid-template-columns: 280px 1fr !important;
-    gap: 40px !important;
-  }
-
-  .stones-filter-wrap {
-    grid-template-columns: 280px 1fr !important;
-    gap: 60px !important;
-  }
-}
-
-@media (max-width: 900px) {
-  .collection-layout-grid {
-    grid-template-columns: 1fr !important;
-    gap: 48px !important;
-  }
-
-  .filter-column {
-    position: static !important;
-    max-width: 100% !important;
-  }
-
-  .stones-filter-wrap {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 48px !important;
-    width: 100% !important;
-  }
-
-  .filter-sidebar {
-    position: static !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    margin-bottom: 40px;
-  }
-
-  .stones-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 32px !important;
-    width: 100% !important;
-  }
-
-  .filter-results {
-    width: 100% !important;
-  }
-}
-
-@media (max-width: 640px) {
-  .stones-grid-filtered {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 16px !important;
-  }
-
-  .stones-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 16px !important;
-    width: 100%;
-  }
-
-  .filter-sidebar {
-    padding: 24px 20px !important;
-  }
-
-  .filter-results {
-    padding: 0 !important;
-  }
-
-  /* Ensure stone cards are equal size */
-  .stone-card {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Ensure image frames maintain aspect ratio */
-  .stone-image-frame {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    overflow: hidden;
-  }
-
-  .stone-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  /* Adjust text sizing for mobile */
-  .stone-card .stone-name-style {
-    font-size: 15px !important;
-  }
-
-  .stone-card .stone-category-style {
-    font-size: 9px !important;
-  }
-
-  .stone-card .stone-meta-style {
-    font-size: 12px !important;
-  }
-}
-
-@media (max-width: 400px) {
-  .stones-grid-filtered {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 12px !important;
-  }
-
-  .stones-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 12px !important;
-  }
-
-  .stone-card .stone-name-style {
-    font-size: 14px !important;
-  }
-}
-
-/* Mobile responsive styles for hero banner */
-@media (max-width: 768px) {
-  .hero-banner-container {
-    height: 40vh !important;
-    min-height: 280px !important;
-    max-height: 400px !important;
-    margin-top: 70px !important;
-  }
-
-  .hero-banner-image {
-    object-position: center 55% !important;
-  }
-
-  /* ✅ NEW: Logo overlay responsive */
-  .hero-logo-overlay {
-    max-width: 70vw !important;
-    max-height: 150px !important;
-  }
-
-  .hero-text-section {
-    padding: 40px 20px !important;
-  }
-
-  .hero-brand-text {
-    font-size: 9px !important;
-    margin-bottom: 16px !important;
-  }
-
-  .hero-h1 {
-    font-size: 28px !important;
-    line-height: 1.3 !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .hero-banner-container {
-    height: 35vh !important;
-    min-height: 250px !important;
-    margin-top: 60px !important;
-  }
-
-  /* ✅ NEW: Smaller logo on very small screens */
-  .hero-logo-overlay {
-    max-width: 80vw !important;
-    max-height: 120px !important;
-  }
-
-  .hero-text-section {
-    padding: 30px 20px !important;
-  }
-
-  .hero-h1 {
-    font-size: 24px !important;
-  }
-}
-
-/* Stone gallery responsive */
-.stone-gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-}
-
-@media (max-width: 900px) {
-  .stone-gallery-grid {
-    grid-template-columns: 1fr !important;
-    gap: 20px !important;
-  }
-}
-
-@media (max-width: 640px) {
-  .stone-gallery-grid {
-    gap: 16px !important;
-  }
-
-  .stone-gallery-item {
-    cursor: pointer;
-  }
-}
-
-/* Stone detail page responsive */
-@media (max-width: 1024px) {
-  .stone-detail-wrapper {
-    grid-template-columns: 350px 1fr !important;
-    gap: 60px !important;
-  }
-}
-
-@media (max-width: 900px) {
-  .stone-detail-wrapper {
-    grid-template-columns: 1fr !important;
-    gap: 48px !important;
-  }
-
-  .stone-detail-column {
-    position: static !important;
-  }
-
-  .stone-detail-gallery {
-    grid-template-columns: 1fr !important;
-    gap: 20px !important;
-    width: 100%;
-  }
-
-  .stone-detail-gallery button {
-    width: 100% !important;
-  }
-
-  .stone-detail-gallery img {
-    width: 100% !important;
-    height: auto !important;
-    min-height: 280px;
-  }
-}
-
-@media (max-width: 640px) {
-  .stone-detail-page {
-    padding: 40px 20px 80px !important;
-  }
-
-  .stone-detail-nav {
-    margin-bottom: 60px !important;
-  }
-
-  .stone-detail-h1 {
-    font-size: 32px !important;
-    margin-bottom: 32px !important;
-  }
-
-  .stone-detail-specifications {
-    gap: 16px !important;
-  }
-
-  .stone-detail-spec-row {
-    padding-bottom: 16px !important;
-  }
-
-  .stone-detail-divider {
-    margin: 32px 0 !important;
-  }
-
-  .whatsapp-link {
-    width: 100% !important;
-    justify-content: center !important;
-  }
-}
-
-/* --- Mobile fixes for hero + category pills --- */
-@media (max-width: 640px) {
-  .hero-banner-container {
-    height: 38vh !important;
-    min-height: 260px !important;
-    max-height: 420px !important;
-    margin-top: 64px !important;
-  }
-
-  .hero-text-section {
-    padding: 40px 6vw !important;
-  }
-
-  .hero-h1 {
-    line-height: 1.12 !important;
-    letter-spacing: 0.12em !important;
-    word-break: keep-all;
-    overflow-wrap: anywhere;
-    margin: 0 !important;
-  }
-
-  .hero-brand-text {
-    line-height: 1.65 !important;
-    letter-spacing: 0.22em !important;
-    margin-top: 12px !important;
-    text-wrap: balance;
-  }
-
-  .category-nav {
-    gap: 10px !important;
-  }
-
-  .category-pill {
-    padding: 9px 12px !important;
-    font-size: 11px !important;
-    letter-spacing: 0.1em !important;
-    line-height: 1.2 !important;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    white-space: nowrap;
-  }
+@media (max-width: 560px) {
+  html, body { font-size: 15px; }
 }

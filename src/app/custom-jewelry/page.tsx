@@ -1,13 +1,9 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import Navigation from "@/app/components/Navigation";
-
-const FM = `"Inter","Helvetica Neue",Arial,sans-serif`;
-const FS = `"Crimson Pro","Cormorant Garamond","EB Garamond",Georgia,serif`;
 
 const JEWELRY_TYPES = ["Ring", "Necklace", "Bracelet", "Earrings", "Brooch", "Other"];
-const METALS  = ["Yellow Gold", "White Gold", "Rose Gold", "Silver / Platinum", "Not sure yet"];
+const METALS = ["Yellow Gold", "White Gold", "Rose Gold", "Silver / Platinum", "Not sure yet"];
 const BUDGETS = ["Under $1,000", "$1,000 – $3,000", "$3,000 – $8,000", "$8,000 – $20,000", "$20,000+", "Flexible"];
 const STONE_OPTS = [
     "I have a specific stone in mind",
@@ -19,20 +15,20 @@ const STONE_OPTS = [
 type ImageFile = { file: File; preview: string };
 
 export default function CustomJewelryClient() {
-    const [name,        setName]        = useState("");
-    const [email,       setEmail]       = useState("");
-    const [phone,       setPhone]       = useState("");
-    const [occasion,    setOccasion]    = useState("");
-    const [type,        setType]        = useState("");
-    const [metal,       setMetal]       = useState("");
-    const [budget,      setBudget]      = useState("");
-    const [stoneOpt,    setStoneOpt]    = useState("");
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [phone, setPhone] = useState("");
+    const [occasion, setOccasion] = useState("");
+    const [type, setType] = useState("");
+    const [metal, setMetal] = useState("");
+    const [budget, setBudget] = useState("");
+    const [stoneOpt, setStoneOpt] = useState("");
     const [description, setDescription] = useState("");
-    const [images,      setImages]      = useState<ImageFile[]>([]);
-    const [dragOver,    setDragOver]    = useState(false);
-    const [submitted,   setSubmitted]   = useState(false);
-    const [sending,     setSending]     = useState(false);
-    const [error,       setError]       = useState("");
+    const [images, setImages] = useState<ImageFile[]>([]);
+    const [dragOver, setDragOver] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const [sending, setSending] = useState(false);
+    const [error, setError] = useState("");
 
     const fileRef = useRef<HTMLInputElement>(null);
 
@@ -74,199 +70,190 @@ export default function CustomJewelryClient() {
     }
 
     if (submitted) return (
-        <>
-            <Navigation />
-            <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#fff", fontFamily: FM, paddingTop: 120, paddingBottom: 40, paddingLeft: "5vw", paddingRight: "5vw" }}>
-                <div style={{ textAlign: "center", maxWidth: 420 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#111", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, margin: "0 auto 24px" }}>✓</div>
-                    <h2 style={{ fontFamily: FS, fontSize: 34, fontWeight: 400, margin: "0 0 12px", color: "#111" }}>Request received.</h2>
-                    <p style={{ fontSize: 15, color: "#555", lineHeight: 1.7, margin: "0 0 28px" }}>
-                        Thank you, {name.split(" ")[0]}. We'll be in touch within 24 hours.
-                    </p>
-                    <button onClick={() => setSubmitted(false)} style={btnOutline}>Submit another request</button>
-                </div>
+        <div style={successWrapStyle}>
+            <div style={{ textAlign: "center", maxWidth: 520 }}>
+                <div style={labelStyle}>Received</div>
+                <h2 style={successTitleStyle}>
+                    Thank you, <em style={{ fontStyle: "italic" }}>{name.split(" ")[0]}.</em>
+                </h2>
+                <p style={successLedeStyle}>
+                    Your enquiry has been received. A member of the house will respond within twenty-four hours with first proposals and next steps.
+                </p>
+                <button onClick={() => setSubmitted(false)} style={btnGhostStyle}>Submit another</button>
             </div>
-        </>
+        </div>
     );
 
     return (
-        <>
-            <Navigation />
-            <div style={{ background: "#fff", minHeight: "100vh", fontFamily: FM, color: "#111", paddingTop: 92 }}>
+        <div style={pageStyle} className="cg-cj-page">
 
-                {/* PAGE HEADER */}
-                <div style={{ paddingTop: 48, paddingBottom: 40, paddingLeft: "5vw", paddingRight: "5vw", borderBottom: "1px solid #e8e8e8", maxWidth: 1100, margin: "0 auto" }}>
-                    <p style={{ fontSize: 11, letterSpacing: "0.20em", textTransform: "uppercase" as const, color: "#999", margin: "0 0 10px" }}>
-                        Custom Jewellery
-                    </p>
-                    <h1 style={{ fontFamily: FS, fontSize: "clamp(30px,4vw,48px)", fontWeight: 400, letterSpacing: "-0.02em", color: "#111", margin: "0 0 10px", lineHeight: 1.05 }}>
-                        Commission a bespoke piece.
-                    </h1>
-                    <p style={{ fontSize: 14, color: "#666", lineHeight: 1.6, margin: 0, maxWidth: 480 }}>
-                        Tell us what you have in mind and we'll get back to you within 24 hours.
-                    </p>
+            {/* Masthead */}
+            <div style={mastheadStyle}>
+                <div style={mastheadMetaStyle}>
+                    <div>
+                        <div style={labelStyle}>Section</div>
+                        <div style={valueStyle}>Commissions</div>
+                    </div>
+                    <div>
+                        <div style={labelStyle}>Response</div>
+                        <div style={valueStyle}>Within 24 hours</div>
+                    </div>
                 </div>
 
-                {/* FORM */}
-                <form onSubmit={handleSubmit} style={{ maxWidth: 1100, margin: "0 auto", paddingTop: 48, paddingBottom: 80, paddingLeft: "5vw", paddingRight: "5vw" }}>
+                <h1 style={h1Style} className="cg-cj-h1">
+                    A piece,<br />
+                    made entirely <em style={{ fontStyle: "italic" }}>for you.</em>
+                </h1>
 
-                    <Row label="Your details">
-                        <div className="cj-g4">
-                            <InputField label="Full name *"     value={name}     onChange={setName}     placeholder="Your name"       required />
-                            <InputField label="Email address *" value={email}    onChange={setEmail}    placeholder="you@example.com" required type="email" />
-                            <InputField label="Phone"           value={phone}    onChange={setPhone}    placeholder="+1 (optional)" />
-                            <InputField label="Occasion"        value={occasion} onChange={setOccasion} placeholder="Engagement, gift…" />
-                        </div>
-                    </Row>
+                <p style={ledeStyle}>
+                    Every commission begins in conversation. Tell us what you have in mind — in whatever detail comes to you. We'll reply with first proposals, not a price sheet.
+                </p>
 
-                    <Row label="What would you like made?">
-                        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8 }}>
-                            {JEWELRY_TYPES.map(t => (
-                                <ToggleBtn key={t} label={t} active={type === t} onClick={() => setType(t)} />
-                            ))}
-                        </div>
-                    </Row>
-
-                    <Row label="Preferences">
-                        <div className="cj-g2">
-                            <div>
-                                <SectionLabel>Metal</SectionLabel>
-                                <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
-                                    {METALS.map(m => <PickRow key={m} label={m} selected={metal === m} onClick={() => setMetal(m)} />)}
-                                </div>
-                            </div>
-                            <div>
-                                <SectionLabel>Budget</SectionLabel>
-                                <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
-                                    {BUDGETS.map(b => <PickRow key={b} label={b} selected={budget === b} onClick={() => setBudget(b)} />)}
-                                </div>
-                            </div>
-                        </div>
-                    </Row>
-
-                    <Row label="Stone">
-                        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8 }}>
-                            {STONE_OPTS.map(o => (
-                                <ToggleBtn key={o} label={o} active={stoneOpt === o} onClick={() => setStoneOpt(o)} />
-                            ))}
-                        </div>
-                    </Row>
-
-                    <Row label="Your vision">
-                        <div className="cj-g2">
-                            <div>
-                                <SectionLabel>Describe what you have in mind *</SectionLabel>
-                                <textarea
-                                    required rows={6}
-                                    value={description}
-                                    onChange={e => setDescription(e.target.value)}
-                                    placeholder="Style, inspiration, details that matter to you…"
-                                    style={{ ...inputBase, resize: "vertical" as const, minHeight: 140 }}
-                                />
-                            </div>
-                            <div>
-                                <SectionLabel>Inspiration images — optional (up to 5)</SectionLabel>
-                                <div
-                                    onClick={() => fileRef.current?.click()}
-                                    onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-                                    onDragLeave={() => setDragOver(false)}
-                                    onDrop={e => { e.preventDefault(); setDragOver(false); addImages(e.dataTransfer.files); }}
-                                    style={{
-                                        border: `1px dashed ${dragOver ? "#111" : "#ccc"}`,
-                                        padding: "24px 16px", textAlign: "center" as const,
-                                        cursor: "pointer", background: dragOver ? "#f8f8f8" : "#fff",
-                                        transition: "all 0.12s", marginBottom: 10,
-                                    }}
-                                >
-                                    <p style={{ margin: 0, fontSize: 13, color: "#666" }}>
-                                        Drop images or <span style={{ color: "#111", textDecoration: "underline" }}>browse</span>
-                                    </p>
-                                    <p style={{ margin: "4px 0 0", fontSize: 11, color: "#bbb" }}>JPG, PNG, WEBP — max 5</p>
-                                    <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: "none" }}
-                                           onChange={e => e.target.files && addImages(e.target.files)} />
-                                </div>
-                                {images.length > 0 && (
-                                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as const }}>
-                                        {images.map((img, i) => (
-                                            <div key={i} style={{ position: "relative", width: 64, height: 64 }}>
-                                                <img src={img.preview} alt="" style={{ width: 64, height: 64, objectFit: "cover", display: "block", border: "1px solid #e0e0e0" }} />
-                                                <button type="button" onClick={() => removeImage(i)} style={{
-                                                    position: "absolute", top: 2, right: 2, width: 16, height: 16,
-                                                    borderRadius: "50%", background: "#111", color: "#fff", border: "none",
-                                                    cursor: "pointer", fontSize: 8, fontFamily: FM,
-                                                    display: "flex", alignItems: "center", justifyContent: "center",
-                                                }}>✕</button>
-                                            </div>
-                                        ))}
-                                        {images.length < 5 && (
-                                            <button type="button" onClick={() => fileRef.current?.click()} style={{
-                                                width: 64, height: 64, border: "1px dashed #ddd",
-                                                background: "#fafafa", cursor: "pointer", fontSize: 18, color: "#ccc",
-                                                display: "flex", alignItems: "center", justifyContent: "center",
-                                            }}>+</button>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </Row>
-
-                    {error && (
-                        <div style={{ padding: "12px 14px", border: "1px solid #fcc", background: "#fff5f5", fontSize: 13, color: "#c00", marginBottom: 20 }}>
-                            {error}
-                        </div>
-                    )}
-
-                    <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" as const }}>
-                        <button type="submit" disabled={sending} style={{
-                            padding: "14px 36px", background: "#111", color: "#fff",
-                            border: "1px solid #111", fontSize: 12, letterSpacing: "0.12em",
-                            textTransform: "uppercase" as const, cursor: sending ? "default" : "pointer",
-                            fontFamily: FM, fontWeight: 500, opacity: sending ? 0.6 : 1, transition: "opacity 0.12s",
-                        }}>
-                            {sending ? "Sending…" : "Submit Enquiry →"}
-                        </button>
-                        <span style={{ fontSize: 12, color: "#bbb" }}>We'll reply within 24 hours. No commitment required.</span>
-                    </div>
-
-                </form>
+                <div style={{ height: 1, background: "#000", margin: "40px 0 0" }} />
             </div>
+
+            <form onSubmit={handleSubmit} style={formStyle}>
+
+                <Section num="I" label="Your Details">
+                    <div className="cj-g2">
+                        <InputField label="Full Name" value={name} onChange={setName} placeholder="Your name" required />
+                        <InputField label="Email Address" value={email} onChange={setEmail} placeholder="you@example.com" required type="email" />
+                        <InputField label="Telephone" value={phone} onChange={setPhone} placeholder="(optional)" />
+                        <InputField label="Occasion" value={occasion} onChange={setOccasion} placeholder="Engagement, gift, self" />
+                    </div>
+                </Section>
+
+                <Section num="II" label="The Piece">
+                    <FieldLabel>Type</FieldLabel>
+                    <div style={toggleRowStyle}>
+                        {JEWELRY_TYPES.map(t => (
+                            <ToggleBtn key={t} label={t} active={type === t} onClick={() => setType(t)} />
+                        ))}
+                    </div>
+                </Section>
+
+                <Section num="III" label="Preferences">
+                    <div className="cj-g2">
+                        <div>
+                            <FieldLabel>Metal</FieldLabel>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                                {METALS.map(m => <PickRow key={m} label={m} selected={metal === m} onClick={() => setMetal(m)} />)}
+                            </div>
+                        </div>
+                        <div>
+                            <FieldLabel>Budget</FieldLabel>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                                {BUDGETS.map(b => <PickRow key={b} label={b} selected={budget === b} onClick={() => setBudget(b)} />)}
+                            </div>
+                        </div>
+                    </div>
+                </Section>
+
+                <Section num="IV" label="Stone">
+                    <div style={toggleRowStyle}>
+                        {STONE_OPTS.map(o => (
+                            <ToggleBtn key={o} label={o} active={stoneOpt === o} onClick={() => setStoneOpt(o)} />
+                        ))}
+                    </div>
+                </Section>
+
+                <Section num="V" label="Your Vision">
+                    <div className="cj-g2">
+                        <div>
+                            <FieldLabel>Describe what you have in mind <span style={{ fontStyle: "italic", fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>— required</span></FieldLabel>
+                            <textarea
+                                required rows={8}
+                                value={description}
+                                onChange={e => setDescription(e.target.value)}
+                                placeholder="A word, a sentence, a page. Whatever comes to you."
+                                style={{ ...inputBase, resize: "vertical", minHeight: 180 }}
+                            />
+                        </div>
+                        <div>
+                            <FieldLabel>Inspiration <span style={{ fontStyle: "italic", fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>— optional, up to 5</span></FieldLabel>
+                            <div
+                                onClick={() => fileRef.current?.click()}
+                                onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                                onDragLeave={() => setDragOver(false)}
+                                onDrop={e => { e.preventDefault(); setDragOver(false); addImages(e.dataTransfer.files); }}
+                                style={{
+                                    border: `1px dashed ${dragOver ? "#000" : "rgba(0,0,0,0.3)"}`,
+                                    padding: "40px 20px",
+                                    textAlign: "center",
+                                    cursor: "pointer",
+                                    background: dragOver ? "rgba(0,0,0,0.03)" : "transparent",
+                                    transition: "all 0.15s",
+                                    marginBottom: 12,
+                                }}
+                            >
+                                <p style={{ margin: 0, fontFamily: "var(--serif)", fontSize: 17, fontStyle: "italic", color: "#000" }}>
+                                    Drop images here, or <span style={{ textDecoration: "underline" }}>browse</span>
+                                </p>
+                                <p style={{ margin: "8px 0 0", fontFamily: "var(--sans)", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: "#000", opacity: 0.5 }}>
+                                    JPG · PNG · WEBP
+                                </p>
+                                <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: "none" }}
+                                       onChange={e => e.target.files && addImages(e.target.files)} />
+                            </div>
+                            {images.length > 0 && (
+                                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                                    {images.map((img, i) => (
+                                        <div key={i} style={{ position: "relative", width: 80, height: 80 }}>
+                                            <img src={img.preview} alt="" style={{ width: 80, height: 80, objectFit: "cover", display: "block" }} />
+                                            <button type="button" onClick={() => removeImage(i)} style={removeBtnStyle}>✕</button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </Section>
+
+                {error && <div style={errorBoxStyle}>{error}</div>}
+
+                <div style={submitRowStyle}>
+                    <button type="submit" disabled={sending} style={{ ...submitBtnStyle, opacity: sending ? 0.5 : 1 }}>
+                        {sending ? "Sending…" : "Submit Enquiry"}
+                    </button>
+                    <span style={{ fontFamily: "var(--serif)", fontStyle: "italic", fontSize: 14, color: "#000", opacity: 0.7 }}>
+                        A response within 24 hours. No obligation.
+                    </span>
+                </div>
+            </form>
 
             <style>{`
-                .cj-g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
-                .cj-g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
-                textarea:focus, input:focus { border-color: #111 !important; outline: none; }
-                input::placeholder, textarea::placeholder { color: #ccc; font-size: 13px; }
+                .cj-g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
                 @media (max-width: 860px) {
-                    .cj-g4 { grid-template-columns: 1fr 1fr !important; }
                     .cj-g2 { grid-template-columns: 1fr !important; gap: 24px !important; }
                 }
-                @media (max-width: 500px) {
-                    .cj-g4 { grid-template-columns: 1fr !important; }
+                @media (max-width: 768px) {
+                    .cg-cj-page { padding: 100px 24px 80px !important; }
+                    .cg-cj-h1 { font-size: clamp(40px, 10vw, 64px) !important; }
+                }
+                @media (max-width: 560px) {
+                    .cg-cj-page { padding: 90px 20px 60px !important; }
                 }
             `}</style>
-        </>
+        </div>
     );
 }
 
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
+/* ── Subcomponents ── */
+
+function Section({ num, label, children }: { num: string; label: string; children: React.ReactNode }) {
     return (
-        <div style={{ paddingBottom: 36, marginBottom: 36, borderBottom: "1px solid #ebebeb" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
-                <span style={{ fontSize: 10, letterSpacing: "0.20em", textTransform: "uppercase" as const, color: "#111", fontWeight: 600, whiteSpace: "nowrap" as const }}>{label}</span>
-                <div style={{ flex: 1, height: 1, background: "#ebebeb" }} />
+        <div style={{ paddingBottom: 60, marginBottom: 60, borderBottom: "1px solid rgba(0,0,0,0.12)" }}>
+            <div style={sectionHeadStyle}>
+                <span style={{ fontFamily: "var(--serif)", fontStyle: "italic", fontSize: 22, letterSpacing: "-0.01em" }}>{num}</span>
+                <span style={{ ...labelStyle, marginBottom: 0 }}>{label}</span>
             </div>
             {children}
         </div>
     );
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
-    return (
-        <div style={{ fontSize: 11, color: "#999", letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 10, fontWeight: 500 }}>
-            {children}
-        </div>
-    );
+function FieldLabel({ children }: { children: React.ReactNode }) {
+    return <div style={{ ...labelStyle, marginBottom: 14 }}>{children}</div>;
 }
 
 function InputField({ label, value, onChange, placeholder, type = "text", required = false }: {
@@ -275,7 +262,7 @@ function InputField({ label, value, onChange, placeholder, type = "text", requir
 }) {
     return (
         <div>
-            <SectionLabel>{label}</SectionLabel>
+            <FieldLabel>{label}{required && <span style={{ fontStyle: "italic", fontWeight: 400, textTransform: "none", letterSpacing: 0, fontFamily: "var(--serif)" }}> — required</span>}</FieldLabel>
             <input type={type} required={required} value={value} onChange={e => onChange(e.target.value)}
                    placeholder={placeholder} style={inputBase} />
         </div>
@@ -285,11 +272,15 @@ function InputField({ label, value, onChange, placeholder, type = "text", requir
 function ToggleBtn({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
     return (
         <button type="button" onClick={onClick} style={{
-            padding: "8px 18px", fontSize: 13, cursor: "pointer", fontFamily: FM,
-            background: active ? "#111" : "#fff",
-            color:      active ? "#fff" : "#111",
-            border:     `1px solid ${active ? "#111" : "#ddd"}`,
-            transition: "all 0.12s",
+            padding: "10px 22px",
+            fontFamily: "var(--serif)",
+            fontSize: 16,
+            cursor: "pointer",
+            background: active ? "#000" : "transparent",
+            color: active ? "#FFF" : "#000",
+            border: `1px solid ${active ? "#000" : "rgba(0,0,0,0.3)"}`,
+            transition: "all 0.15s",
+            fontStyle: active ? "normal" : "italic",
         }}>{label}</button>
     );
 }
@@ -297,32 +288,184 @@ function ToggleBtn({ label, active, onClick }: { label: string; active: boolean;
 function PickRow({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) {
     return (
         <button type="button" onClick={onClick} style={{
-            display: "flex", alignItems: "center", gap: 10,
+            display: "flex", alignItems: "center", gap: 14,
             background: "none", border: "none", cursor: "pointer",
-            padding: "2px 0", textAlign: "left" as const, fontFamily: FM,
+            padding: "4px 0", textAlign: "left",
         }}>
             <span style={{
-                width: 16, height: 16, borderRadius: "50%", flexShrink: 0,
-                border: `2px solid ${selected ? "#111" : "#ccc"}`,
-                background: selected ? "#111" : "#fff",
+                width: 14, height: 14, borderRadius: "50%",
+                border: `1.5px solid ${selected ? "#000" : "rgba(0,0,0,0.3)"}`,
+                background: selected ? "#000" : "transparent",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                transition: "all 0.12s",
+                transition: "all 0.15s",
+                flexShrink: 0,
             }}>
-                {selected && <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#fff", display: "block" }} />}
+                {selected && <span style={{ width: 4, height: 4, borderRadius: "50%", background: "#FFF" }} />}
             </span>
-            <span style={{ fontSize: 14, color: "#111" }}>{label}</span>
+            <span style={{ fontFamily: "var(--serif)", fontSize: 16 }}>{label}</span>
         </button>
     );
 }
 
-const inputBase: React.CSSProperties = {
-    width: "100%", padding: "10px 12px", fontSize: 14,
-    fontFamily: FM, border: "1px solid #ddd",
-    background: "#fff", color: "#111", outline: "none",
-    boxSizing: "border-box", transition: "border-color 0.12s",
+/* STYLES */
+
+const pageStyle: React.CSSProperties = {
+    fontFamily: "var(--serif)",
+    background: "var(--paper, #F4F1EB)",
+    color: "#000",
+    minHeight: "100vh",
+    padding: "140px 5vw 120px",
 };
-const btnOutline: React.CSSProperties = {
-    padding: "10px 22px", background: "#fff", color: "#111",
-    border: "1px solid #ccc", fontSize: 12, letterSpacing: "0.10em",
-    textTransform: "uppercase" as const, cursor: "pointer", fontFamily: FM,
+const mastheadStyle: React.CSSProperties = {
+    maxWidth: 1100, margin: "0 auto 80px",
+};
+const mastheadMetaStyle: React.CSSProperties = {
+    display: "flex",
+    gap: 60,
+    paddingBottom: 20,
+    borderBottom: "1px solid rgba(0,0,0,0.15)",
+    marginBottom: 40,
+};
+const labelStyle: React.CSSProperties = {
+    fontFamily: "var(--sans)",
+    fontSize: 10,
+    letterSpacing: "0.3em",
+    textTransform: "uppercase",
+    color: "#000",
+    marginBottom: 6,
+    fontWeight: 500,
+};
+const valueStyle: React.CSSProperties = {
+    fontFamily: "var(--serif)",
+    fontStyle: "italic",
+    fontSize: 18,
+    color: "#000",
+};
+const h1Style: React.CSSProperties = {
+    fontFamily: "var(--serif)",
+    fontSize: "clamp(48px, 7vw, 112px)",
+    fontWeight: 400,
+    lineHeight: 0.95,
+    letterSpacing: "-0.025em",
+    color: "#000",
+    marginBottom: 32,
+};
+const ledeStyle: React.CSSProperties = {
+    fontFamily: "var(--serif)",
+    fontStyle: "italic",
+    fontSize: 20,
+    lineHeight: 1.55,
+    color: "#000",
+    maxWidth: 640,
+};
+const formStyle: React.CSSProperties = {
+    maxWidth: 1100,
+    margin: "0 auto",
+};
+const sectionHeadStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    gap: 20,
+    marginBottom: 32,
+    paddingBottom: 14,
+    borderBottom: "1px solid #000",
+};
+const inputBase: React.CSSProperties = {
+    width: "100%",
+    padding: "14px 0",
+    background: "transparent",
+    border: "none",
+    borderBottom: "1px solid rgba(0,0,0,0.25)",
+    fontFamily: "var(--serif)",
+    fontSize: 18,
+    color: "#000",
+    outline: "none",
+    boxSizing: "border-box",
+    transition: "border-color 0.2s",
+};
+const toggleRowStyle: React.CSSProperties = {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 10,
+};
+const removeBtnStyle: React.CSSProperties = {
+    position: "absolute",
+    top: 4, right: 4,
+    width: 22, height: 22,
+    background: "#000",
+    color: "#FFF",
+    border: "none",
+    borderRadius: "50%",
+    cursor: "pointer",
+    fontSize: 11,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontFamily: "var(--sans)",
+};
+const errorBoxStyle: React.CSSProperties = {
+    padding: "16px 20px",
+    border: "1px solid rgba(120,20,20,0.5)",
+    background: "rgba(120,20,20,0.04)",
+    fontFamily: "var(--serif)",
+    fontSize: 15,
+    color: "#000",
+    marginBottom: 20,
+};
+const submitRowStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    gap: 24,
+    flexWrap: "wrap",
+    marginTop: 20,
+};
+const submitBtnStyle: React.CSSProperties = {
+    padding: "18px 44px",
+    background: "#000",
+    color: "#FFF",
+    border: "none",
+    fontFamily: "var(--sans)",
+    fontSize: 11,
+    letterSpacing: "0.24em",
+    textTransform: "uppercase",
+    fontWeight: 500,
+    cursor: "pointer",
+};
+
+/* Success */
+const successWrapStyle: React.CSSProperties = {
+    minHeight: "100vh",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    background: "var(--paper, #F4F1EB)",
+    padding: "140px 5vw 60px",
+};
+const successTitleStyle: React.CSSProperties = {
+    fontFamily: "var(--serif)",
+    fontSize: "clamp(44px, 6vw, 72px)",
+    fontWeight: 400,
+    letterSpacing: "-0.025em",
+    lineHeight: 1,
+    marginTop: 20,
+    marginBottom: 28,
+    color: "#000",
+};
+const successLedeStyle: React.CSSProperties = {
+    fontFamily: "var(--serif)",
+    fontStyle: "italic",
+    fontSize: 20,
+    lineHeight: 1.55,
+    color: "#000",
+    marginBottom: 40,
+};
+const btnGhostStyle: React.CSSProperties = {
+    fontFamily: "var(--sans)",
+    fontSize: 11,
+    letterSpacing: "0.24em",
+    textTransform: "uppercase",
+    padding: "14px 28px",
+    background: "transparent",
+    color: "#000",
+    border: "1px solid #000",
+    cursor: "pointer",
+    fontWeight: 500,
 };

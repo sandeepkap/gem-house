@@ -15,20 +15,14 @@ type Stone = {
     origin?: string;
     carat?: number;
     images?: any[];
-
     price?: number | null;
     currency?: string | null;
     priceOnRequest?: boolean | null;
-
     agclNo?: string | null;
     color?: string | null;
     shape?: string | null;
     cut?: string | null;
-    dimensions?: {
-        length?: number | null;
-        width?: number | null;
-        depth?: number | null;
-    } | null;
+    dimensions?: { length?: number | null; width?: number | null; depth?: number | null; } | null;
     comments?: string | null;
 };
 
@@ -42,31 +36,14 @@ function buildWhatsAppLink(phoneDigitsOnly: string, stoneName: string, carat?: n
 async function getStoneById(idRaw: string): Promise<Stone | null> {
     const id = String(idRaw || "").trim();
     if (!id) return null;
-
-    // Support both published + drafts without changing your link mapping
     const draftId = id.startsWith("drafts.") ? id : `drafts.${id}`;
     const publishedId = id.startsWith("drafts.") ? id.replace(/^drafts\./, "") : id;
-
     return client.fetch(
-        `
-    *[_type == "stone" && (_id == $publishedId || _id == $draftId)][0]{
-      _id,
-      name,
-      category,
-      origin,
-      carat,
-      images,
-      price,
-      currency,
-      priceOnRequest,
-      agclNo,
-      color,
-      shape,
-      cut,
-      dimensions,
-      comments
-    }
-  `,
+        `*[_type == "stone" && (_id == $publishedId || _id == $draftId)][0]{
+            _id, name, category, origin, carat, images,
+            price, currency, priceOnRequest,
+            agclNo, color, shape, cut, dimensions, comments
+        }`,
         { publishedId, draftId }
     );
 }
@@ -74,23 +51,18 @@ async function getStoneById(idRaw: string): Promise<Stone | null> {
 function formatPrice(stone: Stone) {
     const por = Boolean(stone.priceOnRequest);
     const priceNum = typeof stone.price === "number" && Number.isFinite(stone.price) ? stone.price : null;
-
     if (por || priceNum === null) return "Price on request";
-
     const ccy = (stone.currency || "USD").toUpperCase();
     return `${ccy} ${priceNum.toLocaleString()}`;
 }
 
 function formatDimensions(dim?: Stone["dimensions"] | null) {
     if (!dim) return null;
-
     const L = typeof dim.length === "number" ? dim.length : null;
     const W = typeof dim.width === "number" ? dim.width : null;
     const D = typeof dim.depth === "number" ? dim.depth : null;
-
     if (L === null && W === null && D === null) return null;
     if (L !== null && W !== null && D !== null) return `${L} × ${W} × ${D} mm`;
-
     const parts = [L, W, D].map((x) => (x === null ? "—" : String(x)));
     return `${parts.join(" × ")} mm`;
 }
@@ -100,357 +72,323 @@ export default async function StoneByIdPage({
                                             }: {
     params: Promise<{ id: string }>;
 }) {
-    // Keep your existing mapping
     const { id } = await params;
     const decodedId = decodeURIComponent(id);
-
     const stone = await getStoneById(decodedId);
 
     if (!stone) {
         return (
-            <main style={notFoundWrapStyle}>
-                <div style={notFoundContentStyle}>
-                    <Reveal>
-                        <div style={kickerStyle}>Unavailable</div>
-                    </Reveal>
-                    <Reveal delayMs={100}>
-                        <h1 style={h1Style}>This stone is not available.</h1>
-                    </Reveal>
-                    <Reveal delayMs={200}>
-                        <Link href="/" style={backLinkStyle}>
-                            ← Return to collection
-                        </Link>
-                    </Reveal>
+            <main style={notFoundWrapStyle} className="cg-stone-notfound">
+                <div style={{ textAlign: "center", maxWidth: 500 }}>
+                    <div style={labelStyle}>Unavailable</div>
+                    <h1 style={{ ...h1Style, marginTop: 20 }}>This stone is <em style={{ fontStyle: "italic" }}>not available.</em></h1>
+                    <Link href="/stones" style={backBtnStyle}>← Return to inventory</Link>
                 </div>
+                <style>{`
+                    @media (max-width: 768px) {
+                        .cg-stone-notfound { padding: 120px 24px 40px !important; }
+                    }
+                `}</style>
             </main>
         );
     }
 
     const dims = formatDimensions(stone.dimensions);
-
-    // Mobile-friendly URLs
     const imageUrls = (stone.images || []).map((img: any) =>
         urlFor(img).width(1600).fit("max").auto("format").url()
     );
 
-    // Inquiry tracking URL (current tab) + WhatsApp URL (new tab)
     const inquireHref = `/inquire/id/${encodeURIComponent(stone._id)}`;
     const whatsappHref = buildWhatsAppLink("16084212077", stone.name, stone.carat);
 
     return (
-        <main style={pageStyle}>
-            <nav style={navStyle}>
-                <Link href="/" style={navLinkStyle}>
-                    ← Collection
-                </Link>
-            </nav>
+        <main style={pageStyle} className="cg-stone-main">
 
-            {/* Mobile: photos first. Desktop: details first + sticky */}
+            <div style={breadcrumbStyle}>
+                <Link href="/stones" style={backLinkStyle}>← Inventory</Link>
+                <div style={breadcrumbMetaStyle}>
+                    <span>{stone.category}</span>
+                    <span style={{ opacity: 0.4, margin: "0 10px" }}>·</span>
+                    <span>{stone.origin || "Undisclosed"}</span>
+                </div>
+            </div>
+
+            <div style={{ height: 1, background: "#000", margin: "28px 0 60px" }} />
+
             <style>{`
-        /* MOBILE (default): photos first */
-        .stone-layout {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 48px;
-          align-items: start;
-        }
-        .stone-gallery {
-          order: 1;
-        }
-        .stone-details {
-          order: 2;
-          position: static;
-        }
+                .stone-layout {
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    gap: 60px;
+                    align-items: start;
+                }
+                .stone-gallery { order: 1; }
+                .stone-details { order: 2; position: static; }
+                .stone-gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
 
-        /* DESKTOP */
-        @media (min-width: 960px) {
-          .stone-layout {
-            grid-template-columns: 400px 1fr;
-            gap: 80px;
-            align-items: start;
-          }
-          .stone-details {
-            order: 1;
-            position: sticky;
-            top: 80px;
-          }
-          .stone-gallery {
-            order: 2;
-          }
-        }
-      `}</style>
+                @media (min-width: 960px) {
+                    .stone-layout {
+                        grid-template-columns: 420px 1fr;
+                        gap: 80px;
+                    }
+                    .stone-details { order: 1; position: sticky; top: 100px; }
+                    .stone-gallery { order: 2; }
+                }
+                @media (max-width: 768px) {
+                    .cg-stone-main { padding: 100px 24px 60px !important; }
+                    .stone-layout { gap: 40px !important; }
+                }
+                @media (max-width: 640px) {
+                    .stone-gallery-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+                }
+                @media (max-width: 560px) {
+                    .cg-stone-main { padding: 90px 20px 50px !important; }
+                }
+            `}</style>
 
-            <div style={contentWrapperStyle} className="stone-layout">
-                <section style={galleryColumnStyle} className="stone-gallery">
-                    <StoneGallery stoneName={stone.name} imageUrls={imageUrls} />
-                </section>
+            <div style={contentStyle} className="stone-layout">
 
                 <aside style={detailsColumnStyle} className="stone-details">
-                    <Reveal delayMs={0}>
-                        <div style={kickerStyle}>{stone.category}</div>
-                    </Reveal>
 
-                    <Reveal delayMs={100}>
+                    <Reveal>
+                        <div style={labelStyle}>{stone.category}</div>
+                    </Reveal>
+                    <Reveal delayMs={80}>
                         <h1 style={h1Style}>{stone.name}</h1>
                     </Reveal>
 
-                    <Reveal delayMs={200}>
-                        <div style={specificationsStyle}>
-                            <div style={specRowStyle}>
-                                <span style={specLabelStyle}>Origin</span>
-                                <span style={specValueStyle}>{stone.origin || "Undisclosed"}</span>
+                    <Reveal delayMs={180}>
+                        <div style={priceBlockStyle}>
+                            <div style={labelStyle}>Offered at</div>
+                            <div style={priceStyle}>
+                                <em style={{ fontStyle: "italic" }}>{formatPrice(stone)}</em>
                             </div>
-
-                            {typeof stone.carat === "number" && (
-                                <div style={specRowStyle}>
-                                    <span style={specLabelStyle}>Weight</span>
-                                    <span style={specValueStyle}>{stone.carat} ct</span>
-                                </div>
-                            )}
-
-                            <div style={specRowStyle}>
-                                <span style={specLabelStyle}>Price</span>
-                                <span style={specValueStyle}>{formatPrice(stone)}</span>
-                            </div>
-
-                            {stone.agclNo ? (
-                                <div style={specRowStyle}>
-                                    <span style={specLabelStyle}>AGCL No</span>
-                                    <span style={specValueStyle}>{stone.agclNo}</span>
-                                </div>
-                            ) : null}
-
-                            {stone.color ? (
-                                <div style={specRowStyle}>
-                                    <span style={specLabelStyle}>Color</span>
-                                    <span style={specValueStyle}>{stone.color}</span>
-                                </div>
-                            ) : null}
-
-                            {stone.shape ? (
-                                <div style={specRowStyle}>
-                                    <span style={specLabelStyle}>Shape</span>
-                                    <span style={specValueStyle}>{stone.shape}</span>
-                                </div>
-                            ) : null}
-
-                            {stone.cut ? (
-                                <div style={specRowStyle}>
-                                    <span style={specLabelStyle}>Cut</span>
-                                    <span style={specValueStyle}>{stone.cut}</span>
-                                </div>
-                            ) : null}
-
-                            {dims ? (
-                                <div style={specRowStyle}>
-                                    <span style={specLabelStyle}>Dimensions</span>
-                                    <span style={specValueStyle}>{dims}</span>
-                                </div>
-                            ) : null}
-
-                            {stone.comments ? (
-                                <div style={{ ...specRowStyle, borderBottom: "none", paddingBottom: 0 }}>
-                                    <span style={specLabelStyle}>Comments</span>
-                                    <span style={{ ...specValueStyle, maxWidth: 240 }}>{stone.comments}</span>
-                                </div>
-                            ) : null}
                         </div>
                     </Reveal>
 
-                    <div style={dividerStyle} />
+                    <Reveal delayMs={260}>
+                        <table style={specTableStyle}>
+                            <tbody>
+                            <SpecRow label="Origin" value={stone.origin || "Undisclosed"} />
+                            {typeof stone.carat === "number" && <SpecRow label="Weight" value={`${stone.carat} ct`} />}
+                            {stone.agclNo && <SpecRow label="AGCL №" value={stone.agclNo} />}
+                            {stone.color && <SpecRow label="Colour" value={stone.color} />}
+                            {stone.shape && <SpecRow label="Shape" value={stone.shape} />}
+                            {stone.cut && <SpecRow label="Cut" value={stone.cut} />}
+                            {dims && <SpecRow label="Dimensions" value={dims} />}
+                            {stone.comments && <SpecRow label="Notes" value={stone.comments} />}
+                            </tbody>
+                        </table>
+                    </Reveal>
 
-                    <Reveal delayMs={300}>
-                        <div>
-                            <div style={sectionKickerStyle}>Inquiries</div>
-                            <h2 style={h2Style}>Request Details</h2>
-
-                            <p style={ledeStyle}>
-                                Contact us for availability, certification, and purchasing arrangements.
+                    <Reveal delayMs={340}>
+                        <div style={actionsStyle}>
+                            <WhatsAppInquireLink
+                                inquireHref={inquireHref}
+                                whatsappHref={whatsappHref}
+                                style={primaryBtnStyle}
+                                iconStyle={{ display: "none" }}
+                            />
+                            <a
+                                href={`mailto:ceylongemcompany.inquiries@gmail.com?subject=${encodeURIComponent(`Enquiry — ${stone.name}`)}`}
+                                style={secondaryBtnStyle}
+                            >
+                                Enquire by Email
+                            </a>
+                            <p style={actionNoteStyle}>
+                                Private viewings arranged by appointment. Pre-filled enquiry references {stone.name}.
                             </p>
-
-                            <div style={contactActionsStyle}>
-                                <a href="mailto:hasinirana1@gmail.com" style={emailLinkStyle}>
-                                    hasinirana1@gmail.com
-                                </a>
-
-                                {/* Opens WhatsApp in a NEW TAB, and loads /inquire/... in the CURRENT TAB for tracking */}
-                                <WhatsAppInquireLink
-                                    inquireHref={inquireHref}
-                                    whatsappHref={whatsappHref}
-                                    style={whatsAppLinkStyle}
-                                    iconStyle={whatsAppIconStyle}
-                                />
-
-                                <div style={contactNoteStyle}>Pre-filled message references {stone.name}</div>
-                            </div>
                         </div>
                     </Reveal>
                 </aside>
+
+                <section className="stone-gallery">
+                    <StoneGallery stoneName={stone.name} imageUrls={imageUrls} />
+                </section>
             </div>
 
             <footer style={footerStyle}>
-                © {new Date().getFullYear()} CEYLON GEM COMPANY — Private sourcing by appointment
+                © {new Date().getFullYear()} Ceylon Gem Company · Private Sourcing by Appointment
             </footer>
         </main>
     );
 }
 
-/* ------------------ STYLES ------------------ */
+function SpecRow({ label, value }: { label: string; value: string }) {
+    return (
+        <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.1)" }}>
+            <th style={specThStyle} scope="row">{label}</th>
+            <td style={specTdStyle}>{value}</td>
+        </tr>
+    );
+}
+
+/* STYLES */
 
 const pageStyle: React.CSSProperties = {
-    fontFamily: `"Crimson Pro", "Cormorant Garamond", "EB Garamond", Georgia, serif`,
-    background: "#0a0a0a",
-    color: "#fafafa",
+    fontFamily: "var(--serif)",
+    background: "var(--paper, #F4F1EB)",
+    color: "#000",
     minHeight: "100vh",
-    padding: "60px 5vw 100px",
+    padding: "120px 5vw 80px",
 };
-
-const navStyle: React.CSSProperties = { maxWidth: 1400, margin: "0 auto 80px" };
-
-const navLinkStyle: React.CSSProperties = {
-    fontSize: 13,
-    letterSpacing: "0.02em",
-    color: "rgba(250, 250, 250, 0.56)",
-    textDecoration: "none",
-};
-
-const contentWrapperStyle: React.CSSProperties = {
-    maxWidth: 1400,
-    margin: "0 auto",
-};
-
-const detailsColumnStyle: React.CSSProperties = {};
-
-const kickerStyle: React.CSSProperties = {
-    fontSize: 10,
-    letterSpacing: "0.26em",
-    textTransform: "uppercase",
-    color: "rgba(250, 250, 250, 0.48)",
-    marginBottom: 16,
-};
-
-const h1Style: React.CSSProperties = {
-    fontSize: "clamp(28px, 3vw, 42px)",
-    fontWeight: 400,
-    letterSpacing: "-0.02em",
-    lineHeight: 1.15,
-    marginBottom: 48,
-};
-
-const specificationsStyle: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 20 };
-
-const specRowStyle: React.CSSProperties = {
+const breadcrumbStyle: React.CSSProperties = {
+    maxWidth: 1600, margin: "0 auto",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "baseline",
-    paddingBottom: 20,
-    borderBottom: "1px solid rgba(250, 250, 250, 0.08)",
-    gap: 18,
+    flexWrap: "wrap",
+    gap: 12,
 };
-
-const specLabelStyle: React.CSSProperties = {
-    fontSize: 12,
-    letterSpacing: "0.08em",
+const backLinkStyle: React.CSSProperties = {
+    fontFamily: "var(--sans)",
+    fontSize: 11,
+    letterSpacing: "0.2em",
     textTransform: "uppercase",
-    color: "rgba(250, 250, 250, 0.48)",
-    flexShrink: 0,
+    color: "#000",
+    textDecoration: "none",
+    fontWeight: 500,
+    borderBottom: "1px solid #000",
+    paddingBottom: 3,
 };
-
-const specValueStyle: React.CSSProperties = {
-    fontSize: 15,
-    color: "#fafafa",
-    fontWeight: 300,
+const breadcrumbMetaStyle: React.CSSProperties = {
+    fontFamily: "var(--sans)",
+    fontSize: 10,
+    letterSpacing: "0.2em",
+    textTransform: "uppercase",
+    color: "#000",
+    opacity: 0.65,
+};
+const contentStyle: React.CSSProperties = {
+    maxWidth: 1600, margin: "0 auto",
+};
+const detailsColumnStyle: React.CSSProperties = {};
+const labelStyle: React.CSSProperties = {
+    fontFamily: "var(--sans)",
+    fontSize: 10,
+    letterSpacing: "0.3em",
+    textTransform: "uppercase",
+    color: "#000",
+    marginBottom: 16,
+    fontWeight: 500,
+};
+const h1Style: React.CSSProperties = {
+    fontFamily: "var(--serif)",
+    fontSize: "clamp(40px, 5vw, 72px)",
+    fontWeight: 400,
+    letterSpacing: "-0.02em",
+    lineHeight: 1,
+    color: "#000",
+    marginBottom: 36,
+};
+const priceBlockStyle: React.CSSProperties = {
+    padding: "24px 0",
+    borderTop: "1px solid #000",
+    borderBottom: "1px solid rgba(0,0,0,0.15)",
+    marginBottom: 32,
+};
+const priceStyle: React.CSSProperties = {
+    fontFamily: "var(--serif)",
+    fontSize: 32,
+    color: "#000",
+    marginTop: 6,
+};
+const specTableStyle: React.CSSProperties = {
+    width: "100%",
+    borderCollapse: "collapse",
+    marginBottom: 36,
+    borderTop: "1px solid rgba(0,0,0,0.1)",
+};
+const specThStyle: React.CSSProperties = {
+    fontFamily: "var(--sans)",
+    fontSize: 10,
+    letterSpacing: "0.22em",
+    textTransform: "uppercase",
+    color: "#000",
+    opacity: 0.7,
+    padding: "16px 0",
+    textAlign: "left",
+    fontWeight: 500,
+    verticalAlign: "top",
+    width: "40%",
+};
+const specTdStyle: React.CSSProperties = {
+    fontFamily: "var(--serif)",
+    fontSize: 16,
+    color: "#000",
+    padding: "16px 0",
     textAlign: "right",
     wordBreak: "break-word",
 };
-
-const dividerStyle: React.CSSProperties = {
-    height: 1,
-    background: "rgba(250, 250, 250, 0.08)",
-    margin: "48px 0",
-};
-
-const sectionKickerStyle: React.CSSProperties = {
-    fontSize: 10,
-    letterSpacing: "0.26em",
-    textTransform: "uppercase",
-    color: "rgba(250, 250, 250, 0.48)",
-    marginBottom: 12,
-};
-
-const h2Style: React.CSSProperties = { fontSize: 24, fontWeight: 400, letterSpacing: "-0.01em", marginBottom: 16 };
-
-const ledeStyle: React.CSSProperties = {
-    fontSize: 15,
-    lineHeight: 1.7,
-    color: "rgba(250, 250, 250, 0.6)",
-    fontWeight: 300,
-    marginBottom: 32,
-};
-
-const contactActionsStyle: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 16 };
-
-const emailLinkStyle: React.CSSProperties = {
-    fontSize: 16,
-    color: "#fafafa",
-    textDecoration: "none",
-    paddingBottom: 16,
-    borderBottom: "1px solid rgba(250, 250, 250, 0.08)",
-    wordBreak: "break-word",
-};
-
-const whatsAppLinkStyle: React.CSSProperties = {
-    display: "inline-flex",
-    alignItems: "center",
+const actionsStyle: React.CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
     gap: 10,
-    fontSize: 14,
-    letterSpacing: "0.02em",
-    color: "#fafafa",
-    textDecoration: "none",
+};
+const primaryBtnStyle: React.CSSProperties = {
+    fontFamily: "var(--sans)",
+    fontSize: 11,
+    letterSpacing: "0.24em",
+    textTransform: "uppercase",
+    fontWeight: 500,
     padding: "16px 24px",
-    border: "1px solid rgba(250, 250, 250, 0.16)",
-    background: "rgba(250, 250, 250, 0.03)",
-    width: "fit-content",
+    background: "#000",
+    color: "#FFF",
+    textDecoration: "none",
+    textAlign: "center",
+    cursor: "pointer",
 };
-
-const whatsAppIconStyle: React.CSSProperties = { fontSize: 18 };
-
-const contactNoteStyle: React.CSSProperties = {
+const secondaryBtnStyle: React.CSSProperties = {
+    fontFamily: "var(--sans)",
     fontSize: 11,
-    color: "rgba(250, 250, 250, 0.42)",
-    letterSpacing: "0.01em",
+    letterSpacing: "0.24em",
+    textTransform: "uppercase",
+    fontWeight: 500,
+    padding: "16px 24px",
+    background: "transparent",
+    color: "#000",
+    border: "1px solid #000",
+    textDecoration: "none",
+    textAlign: "center",
+    cursor: "pointer",
 };
-
-const galleryColumnStyle: React.CSSProperties = { width: "100%", minWidth: 0 };
-
+const actionNoteStyle: React.CSSProperties = {
+    fontFamily: "var(--serif)",
+    fontStyle: "italic",
+    fontSize: 14,
+    color: "#000",
+    opacity: 0.65,
+    lineHeight: 1.55,
+    marginTop: 16,
+};
 const footerStyle: React.CSSProperties = {
-    maxWidth: 1400,
-    margin: "100px auto 0",
-    paddingTop: 48,
-    borderTop: "1px solid rgba(250, 250, 250, 0.08)",
-    fontSize: 11,
-    color: "rgba(250, 250, 250, 0.42)",
-    letterSpacing: "0.02em",
+    maxWidth: 1600, margin: "100px auto 0",
+    paddingTop: 32,
+    borderTop: "1px solid rgba(0,0,0,0.15)",
+    fontFamily: "var(--sans)",
+    fontSize: 10,
+    letterSpacing: "0.22em",
+    textTransform: "uppercase",
+    color: "#000",
     textAlign: "center",
 };
-
 const notFoundWrapStyle: React.CSSProperties = {
     minHeight: "100vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "#0a0a0a",
-    color: "#fafafa",
-    padding: "0 5vw",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    background: "var(--paper, #F4F1EB)",
+    padding: "120px 5vw 60px",
+    fontFamily: "var(--serif)",
 };
-
-const notFoundContentStyle: React.CSSProperties = { textAlign: "center", maxWidth: 500 };
-
-const backLinkStyle: React.CSSProperties = {
+const backBtnStyle: React.CSSProperties = {
     display: "inline-block",
     marginTop: 32,
-    fontSize: 14,
-    color: "rgba(250, 250, 250, 0.7)",
+    fontFamily: "var(--sans)",
+    fontSize: 11,
+    letterSpacing: "0.22em",
+    textTransform: "uppercase",
+    color: "#000",
     textDecoration: "none",
-    letterSpacing: "0.02em",
+    borderBottom: "1px solid #000",
+    paddingBottom: 4,
+    fontWeight: 500,
 };

@@ -1,3 +1,4 @@
+// src/app/contact/ContactFields.tsx
 "use client";
 
 import { useMemo, useState } from "react";
@@ -16,22 +17,18 @@ export default function ContactFields({
     const [preferred, setPreferred] = useState<"email" | "phone">("email");
 
     const helper = useMemo(() => {
-        return preferred === "email"
-            ? "We’ll reply by email."
-            : "We’ll reply by phone.";
+        return preferred === "email" ? "We'll reply by email." : "We'll reply by phone.";
     }, [preferred]);
 
     return (
         <>
-            <div style={styles.grid2}>
+            <div style={styles.grid2} className="cg-grid2">
                 <div style={styles.field}>
-                    <label style={styles.label}>Preferred method</label>
+                    <label style={styles.label}>Preferred Method</label>
                     <select
                         name="preferred"
                         value={preferred}
-                        onChange={(e) =>
-                            setPreferred((e.target.value as "email" | "phone") || "email")
-                        }
+                        onChange={(e) => setPreferred((e.target.value as "email" | "phone") || "email")}
                         style={styles.select}
                     >
                         <option value="email">Email</option>
@@ -41,18 +38,14 @@ export default function ContactFields({
 
                 <div style={styles.field}>
                     <label style={styles.label}>Response</label>
-                    <div
-                        style={{
-                            fontSize: 14,
-                            lineHeight: 1.6,
-                            color: "rgba(26,26,26,0.72)",
-                            padding: "14px 16px",
-                            border: "1px solid rgba(26,26,26,0.14)",
-                            background:
-                                "linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0.55))",
-                            borderRadius: 12,
-                        }}
-                    >
+                    <div style={{
+                        fontFamily: "var(--serif)",
+                        fontStyle: "italic",
+                        fontSize: 16,
+                        color: "#000",
+                        padding: "14px 0",
+                        opacity: 0.75,
+                    }}>
                         {helper}
                     </div>
                 </div>
@@ -61,24 +54,12 @@ export default function ContactFields({
             {preferred === "email" ? (
                 <div style={styles.field}>
                     <label style={styles.label}>Email</label>
-                    <input
-                        name="email"
-                        type="email"
-                        required
-                        placeholder="you@example.com"
-                        style={styles.input}
-                    />
+                    <input name="email" type="email" required placeholder="you@example.com" style={styles.input} />
                 </div>
             ) : (
                 <div style={styles.field}>
-                    <label style={styles.label}>Phone</label>
-                    <input
-                        name="phone"
-                        type="tel"
-                        required
-                        placeholder="+1 608 421 2077"
-                        style={styles.input}
-                    />
+                    <label style={styles.label}>Telephone</label>
+                    <input name="phone" type="tel" required placeholder="+1 608 421 2077" style={styles.input} />
                 </div>
             )}
         </>

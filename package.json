@@ -14,6 +14,7 @@
     "@sanity/image-url": "^1.2.0",
     "@sanity/vision": "^4.22.0",
     "cloudinary": "^2.9.0",
+    "framer-motion": "^12.38.0",
     "next": "^16.1.6",
     "next-sanity": "^11.6.12",
     "nodemailer": "^8.0.1",

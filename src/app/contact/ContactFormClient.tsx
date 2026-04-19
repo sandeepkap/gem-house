@@ -1,3 +1,4 @@
+// src/app/contact/ContactFormClient.tsx
 "use client";
 
 import ContactFields from "./ContactFields";
@@ -39,12 +40,9 @@ export default function ContactFormClient({
                     </div>
 
                     <div style={styles.field}>
-                        <label style={styles.label}>Direct</label>
+                        <label style={styles.label}>Or Write Directly</label>
                         <div style={styles.directBox}>
-                            <a
-                                href="mailto:ceylongemcompany.inquiries@gmail.com"
-                                style={styles.directLink}
-                            >
+                            <a href="mailto:ceylongemcompany.inquiries@gmail.com" style={styles.directLink}>
                                 ceylongemcompany.inquiries@gmail.com
                             </a>
                             <a href="tel:+16084212077" style={styles.directLink}>
@@ -70,18 +68,18 @@ export default function ContactFormClient({
                         name="message"
                         required
                         rows={6}
-                        placeholder="Tell us what you’re looking for."
+                        placeholder="What you're looking for — in whatever detail comes to you."
                         style={styles.textarea}
                     />
                 </div>
 
                 <div style={styles.buttonRow}>
                     <button type="submit" style={styles.button}>
-                        Send Inquiry
+                        Send Enquiry
                     </button>
 
                     <div style={styles.note}>
-                        Appointments are arranged strictly by prior arrangement.
+                        Appointments arranged by prior arrangement.
                     </div>
                 </div>
             </form>

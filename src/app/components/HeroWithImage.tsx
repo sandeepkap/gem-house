@@ -3,6 +3,12 @@
 import React, { useState, useEffect } from "react";
 import Reveal from "./Reveal";
 
+/**
+ * Kept for backwards compatibility. This component is not used by the new homepage,
+ * but may still be referenced elsewhere. Styling has been updated to match the new
+ * cream theme and the previous hardcoded "RANASINGHE & CO." brand text has been
+ * replaced with "CEYLON GEM CO.".
+ */
 interface HeroWithImageProps {
     imageSrc: string;
 }
@@ -10,67 +16,48 @@ interface HeroWithImageProps {
 const HeroWithImage: React.FC<HeroWithImageProps> = ({ imageSrc }) => {
     const [isLoaded, setIsLoaded] = useState(false);
 
-    // Preload the image to ensure the fade is perfectly timed
     useEffect(() => {
-        const img = new Image();
+        const img = new window.Image();
         img.src = imageSrc;
         img.onload = () => setIsLoaded(true);
     }, [imageSrc]);
 
     return (
         <section style={heroSectionStyle}>
-            {/* BACKGROUND LAYER */}
             <div style={heroImageContainerStyle}>
-                {/* The Actual Image */}
                 <img
                     src={imageSrc}
-                    alt="Ranasinghe & Co. Background"
+                    alt="Ceylon Gem Co."
                     style={{
                         ...heroImageStyle,
-                        opacity: isLoaded ? 0.9 : 0, // Fades in from 0
-                        transform: isLoaded ? "scale(1)" : "scale(1.03)", // Subtle "settling" effect
+                        opacity: isLoaded ? 0.9 : 0,
+                        transform: isLoaded ? "scale(1)" : "scale(1.03)",
                     }}
                 />
-
-                {/* Persistent Gradient Overlay - This handles the bleed into the next section */}
                 <div style={heroFadeOverlayStyle} />
             </div>
 
-            {/* CONTENT LAYER */}
             <div style={heroContentStyle}>
                 <Reveal delayMs={400}>
-                    <div style={brandStyle}>RANASINGHE & CO.</div>
+                    <div style={brandStyle}>CEYLON GEM CO.</div>
                 </Reveal>
                 <Reveal delayMs={550}>
                     <h1 style={h1Style}>
                         Fine Gemstones
-                        <br />
-                        Private Trade
+                        <br />Private Trade
                     </h1>
                 </Reveal>
                 <Reveal delayMs={700}>
                     <p style={ledeStyle}>
                         An understated collection of fine gemstones. Sapphires, rubies,
-                        and emeralds selected for color, proportion, and provenance.
+                        and emeralds selected for colour, proportion, and provenance.
                         Offered exclusively by appointment.
                     </p>
                 </Reveal>
             </div>
-
-            {/* SCROLL INDICATOR */}
-            <div style={{
-                ...scrollIndicatorStyle,
-                opacity: isLoaded ? 1 : 0,
-                transition: "opacity 2s ease 1s" // Waits for image before showing
-            }}>
-                <div style={scrollTextStyle}>The Collection</div>
-                <div style={scrollLineStyle} />
-            </div>
         </section>
     );
 };
-
-/* ------------------ STYLES ------------------ */
 
 const heroSectionStyle: React.CSSProperties = {
     height: "100vh",
@@ -81,89 +68,39 @@ const heroSectionStyle: React.CSSProperties = {
     padding: "0 5vw",
     position: "relative",
     overflow: "hidden",
-    backgroundColor: "#F9F8F6", // High-end 'Paper/Parchment' color
-};
-
-const heroImageContainerStyle: React.CSSProperties = {
-    position: "absolute",
-    inset: 0,
-    zIndex: 0,
     backgroundColor: "#F9F8F6",
 };
-
+const heroImageContainerStyle: React.CSSProperties = {
+    position: "absolute", inset: 0, zIndex: 0,
+    backgroundColor: "#F9F8F6",
+};
 const heroImageStyle: React.CSSProperties = {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    objectPosition: "center",
+    width: "100%", height: "100%",
+    objectFit: "cover", objectPosition: "center",
     transition: "opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1), transform 2s cubic-bezier(0.2, 0, 0.2, 1)",
-    willChange: "opacity, transform",
 };
-
 const heroFadeOverlayStyle: React.CSSProperties = {
-    position: "absolute",
-    inset: 0,
-    // This creates the seamless transition into the #F9F8F6 background of the next section
-    background: "linear-gradient(to bottom, rgba(249, 248, 246, 0) 0%, rgba(249, 248, 246, 0.3) 50%, rgba(249, 248, 246, 1) 100%)",
+    position: "absolute", inset: 0,
+    background: "linear-gradient(to bottom, rgba(249,248,246,0) 0%, rgba(249,248,246,0.3) 50%, rgba(249,248,246,1) 100%)",
 };
-
 const heroContentStyle: React.CSSProperties = {
-    maxWidth: 800,
-    textAlign: "center",
-    position: "relative",
-    zIndex: 2,
+    maxWidth: 800, textAlign: "center", position: "relative", zIndex: 2,
 };
-
 const brandStyle: React.CSSProperties = {
-    fontSize: 11,
-    letterSpacing: "0.5em",
-    textTransform: "uppercase",
-    fontWeight: 400,
-    color: "#1a1a1a",
-    marginBottom: 40,
+    fontSize: 11, letterSpacing: "0.5em", textTransform: "uppercase",
+    fontWeight: 400, color: "#1A1816", marginBottom: 40,
+    fontFamily: `"Inter", sans-serif`,
 };
-
 const h1Style: React.CSSProperties = {
     fontSize: "clamp(48px, 7vw, 82px)",
-    lineHeight: 1.05,
-    fontWeight: 400,
-    letterSpacing: "-0.02em",
-    marginBottom: 32,
+    lineHeight: 1.05, fontWeight: 300,
+    letterSpacing: "-0.02em", marginBottom: 32,
     color: "#000000",
 };
-
 const ledeStyle: React.CSSProperties = {
     fontSize: "clamp(17px, 2vw, 19px)",
-    lineHeight: 1.8,
-    color: "#444444",
-    fontWeight: 300,
-    maxWidth: 600,
-    margin: "0 auto",
-};
-
-const scrollIndicatorStyle: React.CSSProperties = {
-    position: "absolute",
-    bottom: 40,
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 12,
-    zIndex: 2,
-};
-
-const scrollLineStyle: React.CSSProperties = {
-    width: 1,
-    height: 50,
-    backgroundColor: "#1a1a1a",
-    opacity: 0.2,
-};
-
-const scrollTextStyle: React.CSSProperties = {
-    fontSize: 9,
-    letterSpacing: "0.3em",
-    textTransform: "uppercase",
-    color: "#1a1a1a",
-    opacity: 0.5,
+    lineHeight: 1.8, color: "rgba(26,24,22,0.62)",
+    fontWeight: 400, maxWidth: 600, margin: "0 auto",
 };
 
 export default HeroWithImage;
